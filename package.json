@@ -1,0 +1,44 @@
+{
+    "name": "profit-taker-9000",
+    "description": "Find a strategy to take profits on your crypto",
+    "version": "0.0.0",
+    "author": "Roman Scher",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/scherroman/profit-taker-9000.git"
+    },
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
+    "files": [
+        "/build"
+    ],
+    "scripts": {
+        "lint": "eslint source tests --ext .ts",
+        "typecheck": "tsc --noEmit",
+        "prebuild": "rm -rf build",
+        "build": "tsc",
+        "postbuild": "cp -r ./data ./build/",
+        "test": "jest",
+        "run": "ts-node -r tsconfig-paths/register",
+        "prepare": "husky install",
+        "precommit": "npm run lint && npm run typecheck && npm run test"
+    },
+    "devDependencies": {
+        "@types/jest": "27.0.1",
+        "@typescript-eslint/eslint-plugin": "4.29.2",
+        "eslint": "7.32.0",
+        "eslint-plugin-jest": "24.4.0",
+        "husky": "7.0.2",
+        "jest": "27.0.6",
+        "prettier": "2.3.2",
+        "ts-jest": "27.0.5",
+        "ts-node": "10.2.1",
+        "tsconfig-paths": "3.11.0",
+        "typescript": "4.3.5"
+    },
+    "dependencies": {
+        "csv": "5.5.2",
+        "date-fns": "2.23.0"
+    }
+}

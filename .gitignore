@@ -1,0 +1,8 @@
+.vscode/
+node_modules/
+build/
+scripts/
+
+# OS metadata
+.DS_Store
+Thumbs.db
