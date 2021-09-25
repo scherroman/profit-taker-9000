@@ -1,31 +1,40 @@
 import { Trade, TradeType } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { Strategy } from 'strategy'
+import { round } from 'utilities'
 
 /**
  * A naive grid strategy that trades whenever the price of the coin changes by a certain percentage
  */
 export class NaiveGridStrategy extends Strategy {
-    triggerPercentage: number
+    triggerThreshold: number
     tradePercentage: number
 
     /**
      * @param coin - Coin to use
-     * @param triggerPercentage - Percentage change in coin price that should trigger a trade
+     * @param triggerThreshold - Percentage change in coin price that should trigger a trade
      * @param tradePercentage - Percentage of the currently held coin or cash that should be traded
      */
     constructor({
         coin,
-        triggerPercentage,
+        triggerThreshold,
         tradePercentage
     }: {
         coin: Coin
-        triggerPercentage: number
+        triggerThreshold: number
         tradePercentage: number
     }) {
         super({ coin })
-        this.triggerPercentage = triggerPercentage
+        this.triggerThreshold = triggerThreshold
         this.tradePercentage = tradePercentage
+    }
+
+    get #triggerThresholdFraction(): number {
+        return this.triggerThreshold / 100
+    }
+
+    get #tradePercentageFraction(): number {
+        return this.tradePercentage / 100
     }
 
     protected getTrades({
@@ -85,15 +94,28 @@ export class NaiveGridStrategy extends Strategy {
         let trade
         let price = historicalPrice.price
         let date = historicalPrice.date
-        let priceStep = referencePrice * this.triggerPercentage
-        let shouldBuy = price < referencePrice - priceStep && cashAmount !== 0
-        let shouldSell = price > referencePrice + priceStep && coinAmount !== 0
+        let tradingFeePercentageFraction = tradingFeePercentage / 100
+        let multiple = 1 + this.#triggerThresholdFraction
+        let buyPrice = round(
+            this.#triggerThresholdFraction < 1
+                ? referencePrice * (1 - this.#triggerThresholdFraction)
+                : referencePrice / multiple,
+            2
+        )
+        let sellPrice = round(referencePrice * multiple, 2)
+        let shouldBuy = price <= buyPrice && cashAmount !== 0
+        let shouldSell = price >= sellPrice && coinAmount !== 0
 
         if (shouldBuy || shouldSell) {
             if (shouldBuy) {
-                let cashSpent = this.tradePercentage * cashAmount
+                let cashSpent = this.#tradePercentageFraction * cashAmount
+                let fee = cashSpent * tradingFeePercentageFraction
+                if (cashSpent + fee > cashAmount) {
+                    // Ensure we have enough to pay for the fee
+                    cashSpent -= fee
+                    fee = cashSpent * tradingFeePercentageFraction
+                }
                 let coinsPurchased = cashSpent / price
-                let fee = cashSpent * tradingFeePercentage
                 trade = {
                     type: TradeType.Buy,
                     amount: coinsPurchased,
@@ -103,9 +125,9 @@ export class NaiveGridStrategy extends Strategy {
                 coinAmount += coinsPurchased
                 cashAmount -= cashSpent + fee
             } else {
-                let coinsSold = this.tradePercentage * coinAmount
+                let coinsSold = this.#tradePercentageFraction * coinAmount
                 let cashReceived = coinsSold * price
-                let fee = cashReceived * tradingFeePercentage
+                let fee = cashReceived * tradingFeePercentageFraction
                 trade = {
                     type: TradeType.Sell,
                     amount: coinsSold,

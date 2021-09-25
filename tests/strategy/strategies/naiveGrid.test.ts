@@ -4,8 +4,8 @@ import { NaiveGridStrategy } from 'strategy'
 
 let strategy = new NaiveGridStrategy({
     coin: COINS.bitcoin,
-    triggerPercentage: 0.1,
-    tradePercentage: 0.1
+    triggerThreshold: 10,
+    tradePercentage: 10
 })
 
 let basicPrices = [
@@ -43,8 +43,8 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.005,
-            historicalPrices: basicPrices
+            tradingFeePercentage: 0.5,
+            priceHistory: basicPrices
         })
         let buys = trades.filter((trade) => trade.type === TradeType.Buy)
         let sells = trades.filter((trade) => trade.type === TradeType.Sell)
@@ -83,11 +83,6 @@ describe('NaiveGridStrategy', () => {
         ]
 
         let {
-            profit,
-            percentageYield,
-            isProfitable,
-            startingValue,
-            endingValue,
             startingCoinAmount,
             startingCashAmount,
             endingCoinAmount,
@@ -96,8 +91,8 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.05,
-            historicalPrices: prices
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
         })
 
         expect(trades).toHaveLength(0)
@@ -105,19 +100,87 @@ describe('NaiveGridStrategy', () => {
         expect(startingCashAmount).toBe(1000)
         expect(endingCoinAmount).toBeCloseTo(1)
         expect(endingCashAmount).toBeCloseTo(1000)
-        expect(startingValue).toBeCloseTo(1773)
-        expect(endingValue).toBeCloseTo(1755)
-        expect(profit).toBe(-18)
-        expect(percentageYield).toBeCloseTo(-0.01015228)
-        expect(isProfitable).toBe(false)
+    })
+    it('buys and sells on exact price matches', async () => {
+        let prices = [
+            {
+                date: new Date(2014, 1, 1),
+                price: 100
+            },
+            {
+                date: new Date(2014, 2, 1),
+                price: 110
+            },
+            {
+                date: new Date(2014, 3, 1),
+                price: 99
+            }
+        ]
+
+        let { trades } = await strategy.backtest({
+            coinAmount: 1,
+            cashAmount: 1000,
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
+        })
+
+        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
+        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
+
+        expect(trades).toHaveLength(2)
+        expect(buys).toHaveLength(1)
+        expect(sells).toHaveLength(1)
+    })
+    it('adapts the buy price to a multiple that mirrors the sell price multiple when the trigger threshold is 100 or more', async () => {
+        let strategy = new NaiveGridStrategy({
+            coin: COINS.bitcoin,
+            triggerThreshold: 400,
+            tradePercentage: 10
+        })
+        let prices = [
+            {
+                date: new Date(2014, 1, 1),
+                price: 100
+            },
+            {
+                date: new Date(2014, 2, 1),
+                price: 500
+            },
+            {
+                date: new Date(2014, 3, 1),
+                price: 100
+            },
+            {
+                date: new Date(2014, 4, 1),
+                price: 500
+            },
+            {
+                date: new Date(2014, 4, 1),
+                price: 200
+            }
+        ]
+
+        let { trades } = await strategy.backtest({
+            coinAmount: 1,
+            cashAmount: 1000,
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
+        })
+
+        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
+        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
+
+        expect(trades).toHaveLength(3)
+        expect(buys).toHaveLength(1)
+        expect(sells).toHaveLength(2)
     })
     it('will not sell if there are no coins', async () => {
         let prices = basicPrices.slice(0, 2)
         let { trades } = await strategy.backtest({
             coinAmount: 0,
             cashAmount: 1000,
-            tradingFeePercentage: 0.005,
-            historicalPrices: prices
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
         })
         expect(trades).toHaveLength(0)
     })
@@ -126,8 +189,8 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 0,
-            tradingFeePercentage: 0.005,
-            historicalPrices: prices
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
         })
         expect(trades).toHaveLength(0)
     })
@@ -135,10 +198,10 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.05,
+            tradingFeePercentage: 0.5,
             startDate: new Date(2014, 1, 1),
             endDate: new Date(2014, 2, 1),
-            historicalPrices: basicPrices
+            priceHistory: basicPrices
         })
         let buys = trades.filter((trade) => trade.type === TradeType.Buy)
         let sells = trades.filter((trade) => trade.type === TradeType.Sell)
@@ -146,5 +209,67 @@ describe('NaiveGridStrategy', () => {
         expect(trades).toHaveLength(1)
         expect(buys).toHaveLength(0)
         expect(sells).toHaveLength(1)
+    })
+})
+
+describe('NaiveGridStrategy.optimize', () => {
+    it('finds the best and worst parameter combinations', async () => {
+        let prices = [
+            {
+                date: new Date(2014, 1, 1),
+                price: 100
+            },
+            {
+                date: new Date(2014, 2, 1),
+                price: 200
+            },
+            {
+                date: new Date(2014, 3, 1),
+                price: 300
+            },
+            {
+                date: new Date(2014, 3, 1),
+                price: 50
+            }
+        ]
+        let strategy = new NaiveGridStrategy({
+            coin: COINS.bitcoin,
+            triggerThreshold: 10,
+            tradePercentage: 10
+        })
+
+        let { all } = await strategy.optimize({
+            coinAmount: 1,
+            cashAmount: 1000,
+            tradingFeePercentage: 0.5,
+            priceHistory: prices,
+            parameters: {
+                triggerThreshold: {
+                    minimum: 0,
+                    maximum: 1000,
+                    step: 10
+                },
+                tradePercentage: {
+                    minimum: 0,
+                    maximum: 100,
+                    step: 1
+                }
+            }
+        })
+
+        expect(all).toHaveLength(10201)
+        let previousResult = null
+        for (let result of all) {
+            if (!previousResult) {
+                continue
+            }
+
+            expect(
+                result.backtestResults.profit >=
+                    previousResult.backtestResults.profit
+            ).toBe(true)
+
+            previousResult = result
+        }
     })
 })

@@ -40,8 +40,8 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.05,
-            historicalPrices: prices
+            tradingFeePercentage: 0.5,
+            priceHistory: prices
         })
 
         expect(trades).toHaveLength(0)

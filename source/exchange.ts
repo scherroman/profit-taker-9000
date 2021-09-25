@@ -22,5 +22,5 @@ export enum TradeType {
 }
 
 export const EXCHANGES: Record<string, Exchange> = {
-    coinbasePro: { name: 'Coinbase Pro', tradingFeePercentage: 0.005 }
+    coinbasePro: { name: 'Coinbase Pro', tradingFeePercentage: 0.5 }
 }

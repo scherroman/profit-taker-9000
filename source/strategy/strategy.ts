@@ -1,5 +1,10 @@
 import { differenceInDays, intervalToDuration, formatDuration } from 'date-fns'
-import { humanizeNumber, humanizeDate } from 'utilities'
+import {
+    Range,
+    humanizeNumber,
+    humanizeDate,
+    getRangeCombinations
+} from 'utilities'
 
 import { Trade } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
@@ -24,7 +29,7 @@ export abstract class Strategy {
      * @param tradingFeePercentage - Fee charged per trade
      * @param startDate - Date to start trading on. Default is the first date in the price history.
      * @param endDate - Date to end trading on. Default is the last date in the price history.
-     * @param historicalPrices - Manually set historical prices for the coin
+     * @param priceHistory - Manually set the price history for the coin
      * @returns Results of the backtest, including a list of trades and the profits that would have been made over that period
      */
     async backtest({
@@ -33,14 +38,13 @@ export abstract class Strategy {
         tradingFeePercentage,
         startDate,
         endDate,
-        historicalPrices
+        priceHistory
     }: BacktestInput): Promise<BacktestResults> {
-        let priceHistory = historicalPrices
-            ? new PriceHistory({ prices: historicalPrices })
-            : await this.coin.getPriceHistory()
-        if (startDate || endDate) {
-            priceHistory = priceHistory.forRange({ startDate, endDate })
-        }
+        priceHistory = await this.getPriceHistory({
+            priceHistory,
+            startDate,
+            endDate
+        })
 
         let results = new BacktestResults({
             coin: this.coin,
@@ -80,6 +84,67 @@ export abstract class Strategy {
         cashAmount: number
         tradingFeePercentage: number
     }): { trades: Trade[]; endingCoinAmount: number; endingCashAmount: number }
+
+    async optimize({
+        parameters,
+        startDate,
+        endDate,
+        priceHistory,
+        ...backtestInput
+    }: OptimizeInput): Promise<OptimizationResults> {
+        // Create the price history up front to prevent memory overflows due to creating many copies of the price history during backtesting
+        priceHistory = await this.getPriceHistory({
+            priceHistory,
+            startDate,
+            endDate
+        })
+
+        let parameterBacktestResults = []
+        let parameterCombinations = getRangeCombinations(parameters)
+        for (let parameterCombination of parameterCombinations) {
+            for (let [key, value] of Object.entries(parameterCombination)) {
+                Object.assign(this, { [key]: value })
+            }
+            parameterBacktestResults.push({
+                parameters: parameterCombination,
+                backtestResults: await this.backtest({
+                    priceHistory,
+                    ...backtestInput
+                })
+            })
+        }
+
+        parameterBacktestResults.sort((a, b) =>
+            b.backtestResults.profit > a.backtestResults.profit ? 1 : -1
+        )
+
+        return new OptimizationResults({ results: parameterBacktestResults })
+    }
+
+    async getPriceHistory({
+        priceHistory,
+        startDate,
+        endDate
+    }: {
+        priceHistory?: HistoricalPrice[] | PriceHistory
+        startDate?: Date
+        endDate?: Date
+    }): Promise<PriceHistory> {
+        if (priceHistory) {
+            priceHistory =
+                priceHistory instanceof PriceHistory
+                    ? priceHistory
+                    : new PriceHistory({ prices: priceHistory })
+        } else {
+            priceHistory = await this.coin.getPriceHistory()
+        }
+
+        if (startDate || endDate) {
+            priceHistory = priceHistory.forRange({ startDate, endDate })
+        }
+
+        return priceHistory
+    }
 }
 
 export interface BacktestInput {
@@ -88,7 +153,7 @@ export interface BacktestInput {
     tradingFeePercentage: number
     startDate?: Date
     endDate?: Date
-    historicalPrices?: HistoricalPrice[]
+    priceHistory?: PriceHistory | HistoricalPrice[]
 }
 
 export class BacktestResults {
@@ -241,4 +306,29 @@ export class BacktestResults {
         )}
         `
     }
+}
+
+interface OptimizeInput extends BacktestInput {
+    parameters: Record<string, Range>
+}
+
+export class OptimizationResults {
+    all: ParameterBacktestResults[]
+
+    constructor({ results }: { results: ParameterBacktestResults[] }) {
+        this.all = results
+    }
+
+    get best(): ParameterBacktestResults {
+        return this.all[0]
+    }
+
+    get worst(): ParameterBacktestResults {
+        return this.all[this.all.length - 1]
+    }
+}
+
+interface ParameterBacktestResults {
+    parameters: Record<string, number>
+    backtestResults: BacktestResults
 }
