@@ -1,14 +1,25 @@
 import { Trade, TradeType } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
-import { Strategy } from 'strategy'
+import { Strategy, Parameter, SymbolPosition } from 'strategy'
 import { round } from 'utilities'
 
 /**
  * A naive grid strategy that trades whenever the price of the coin changes by a certain percentage
+ * It's naive because it can end up buying all the way down and selling lower when the price goes up just a little
  */
 export class NaiveGridStrategy extends Strategy {
     triggerThreshold: number
     tradePercentage: number
+    parameters: Parameter[] = [
+        {
+            name: 'triggerThreshold',
+            symbol: { symbol: '%', position: SymbolPosition.Suffix }
+        },
+        {
+            name: 'tradePercentage',
+            symbol: { symbol: '%', position: SymbolPosition.Suffix }
+        }
+    ]
 
     /**
      * @param coin - Coin to use
@@ -25,6 +36,13 @@ export class NaiveGridStrategy extends Strategy {
         tradePercentage: number
     }) {
         super({ coin })
+
+        if (tradePercentage > 100) {
+            throw new Error(
+                `Invalid trade percentage ${tradePercentage}. Trade percentage must be between 0 and 100`
+            )
+        }
+
         this.triggerThreshold = triggerThreshold
         this.tradePercentage = tradePercentage
     }

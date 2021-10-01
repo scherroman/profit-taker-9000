@@ -40,9 +40,7 @@ export class Coin {
             !isArrayOfRawHistoricalPrices(rawPriceHistory) ||
             rawPriceHistory.length === 0
         ) {
-            throw new TypeError(
-                `Failed to read price history for ${this.symbol}`
-            )
+            throw new Error(`Failed to read price history for ${this.symbol}`)
         }
 
         let historicalPrices = []

@@ -90,8 +90,10 @@ export function getRange({
     end: number
     step: number
 }): number[] {
-    if (start > end || step <= 0) {
-        throw new TypeError()
+    if (start > end) {
+        throw new Error('Start must be less than or equal to end')
+    } else if (step <= 0) {
+        throw new Error('Step must be greater than zero')
     }
 
     let numberOfDecimals = countDecimals(step)

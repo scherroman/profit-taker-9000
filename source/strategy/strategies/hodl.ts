@@ -1,6 +1,6 @@
 import { Trade } from 'exchange'
 import { Coin } from 'coin'
-import { Strategy } from 'strategy'
+import { Strategy, Parameter } from 'strategy'
 
 export class HodlStrategy extends Strategy {
     /**
@@ -8,6 +8,10 @@ export class HodlStrategy extends Strategy {
      */
     constructor({ coin }: { coin: Coin }) {
         super({ coin })
+    }
+
+    get parameters(): Parameter[] {
+        return []
     }
 
     protected getTrades({

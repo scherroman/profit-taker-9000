@@ -112,13 +112,11 @@ describe('getRange', () => {
         expect(getRange({ start: 2, end: 2, step: 5 })).toMatchObject([2])
     })
     it('throws an error if step is zero or negative', () => {
-        expect(() => getRange({ start: 1, end: 2, step: 0 })).toThrow(TypeError)
-        expect(() => getRange({ start: 1, end: 2, step: -1 })).toThrow(
-            TypeError
-        )
+        expect(() => getRange({ start: 1, end: 2, step: 0 })).toThrow(Error)
+        expect(() => getRange({ start: 1, end: 2, step: -1 })).toThrow(Error)
     })
     it('throws an error if the start is after end', () => {
-        expect(() => getRange({ start: 2, end: 1, step: 1 })).toThrow(TypeError)
+        expect(() => getRange({ start: 2, end: 1, step: 1 })).toThrow(Error)
     })
 })
 

@@ -243,7 +243,7 @@ describe('NaiveGridStrategy.optimize', () => {
             cashAmount: 1000,
             tradingFeePercentage: 0.5,
             priceHistory: prices,
-            parameters: {
+            parameterRanges: {
                 triggerThreshold: {
                     minimum: 0,
                     maximum: 1000,
