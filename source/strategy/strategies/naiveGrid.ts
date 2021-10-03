@@ -1,15 +1,16 @@
-import { Trade, TradeType } from 'exchange'
+import { Exchange, Trade } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { Strategy, Parameter, SymbolPosition } from 'strategy'
 import { round } from 'utilities'
 
 /**
- * A naive grid strategy that trades whenever the price of the coin changes by a certain percentage
+ * A strategy that trades whenever the price of the coin changes by a certain percentage
  * It's naive because it can end up buying all the way down and selling lower when the price goes up just a little
  */
 export class NaiveGridStrategy extends Strategy {
     triggerThreshold: number
     tradePercentage: number
+    hasPaperHands: boolean
     parameters: Parameter[] = [
         {
             name: 'triggerThreshold',
@@ -25,15 +26,18 @@ export class NaiveGridStrategy extends Strategy {
      * @param coin - Coin to use
      * @param triggerThreshold - Percentage change in coin price that should trigger a trade
      * @param tradePercentage - Percentage of the currently held coin or cash that should be traded
+     * @param hasPaperHands - Reverses the strategy to buy high and sell low like a paper-handed fool
      */
     constructor({
         coin,
         triggerThreshold,
-        tradePercentage
+        tradePercentage,
+        hasPaperHands = false
     }: {
         coin: Coin
         triggerThreshold: number
         tradePercentage: number
+        hasPaperHands?: boolean
     }) {
         super({ coin })
 
@@ -45,6 +49,7 @@ export class NaiveGridStrategy extends Strategy {
 
         this.triggerThreshold = triggerThreshold
         this.tradePercentage = tradePercentage
+        this.hasPaperHands = hasPaperHands
     }
 
     get #triggerThresholdFraction(): number {
@@ -59,12 +64,12 @@ export class NaiveGridStrategy extends Strategy {
         priceHistory,
         coinAmount,
         cashAmount,
-        tradingFeePercentage
+        exchange
     }: {
         priceHistory: PriceHistory
         coinAmount: number
         cashAmount: number
-        tradingFeePercentage: number
+        exchange: Exchange
     }): {
         trades: Trade[]
         endingCoinAmount: number
@@ -79,7 +84,7 @@ export class NaiveGridStrategy extends Strategy {
                 referencePrice,
                 coinAmount,
                 cashAmount,
-                tradingFeePercentage
+                exchange
             })
             if (trade) {
                 trades.push(trade)
@@ -101,62 +106,57 @@ export class NaiveGridStrategy extends Strategy {
         referencePrice,
         coinAmount,
         cashAmount,
-        tradingFeePercentage
+        exchange
     }: {
         historicalPrice: HistoricalPrice
         referencePrice: number
         coinAmount: number
         cashAmount: number
-        tradingFeePercentage: number
+        exchange: Exchange
     }): { trade?: Trade; newCoinAmount: number; newCashAmount: number } {
         let trade
+        let newCoinAmount = coinAmount
+        let newCashAmount = cashAmount
+
         let price = historicalPrice.price
-        let date = historicalPrice.date
-        let tradingFeePercentageFraction = tradingFeePercentage / 100
         let multiple = 1 + this.#triggerThresholdFraction
-        let buyPrice = round(
+
+        let higherPrice = round(referencePrice * multiple, 2)
+        let lowerPrice = round(
             this.#triggerThresholdFraction < 1
                 ? referencePrice * (1 - this.#triggerThresholdFraction)
                 : referencePrice / multiple,
             2
         )
-        let sellPrice = round(referencePrice * multiple, 2)
-        let shouldBuy = price <= buyPrice && cashAmount !== 0
-        let shouldSell = price >= sellPrice && coinAmount !== 0
-
-        if (shouldBuy || shouldSell) {
-            if (shouldBuy) {
-                let cashSpent = this.#tradePercentageFraction * cashAmount
-                let fee = cashSpent * tradingFeePercentageFraction
-                if (cashSpent + fee > cashAmount) {
-                    // Ensure we have enough to pay for the fee
-                    cashSpent -= fee
-                    fee = cashSpent * tradingFeePercentageFraction
-                }
-                let coinsPurchased = cashSpent / price
-                trade = {
-                    type: TradeType.Buy,
-                    amount: coinsPurchased,
-                    price: price,
-                    date: date
-                }
-                coinAmount += coinsPurchased
-                cashAmount -= cashSpent + fee
-            } else {
-                let coinsSold = this.#tradePercentageFraction * coinAmount
-                let cashReceived = coinsSold * price
-                let fee = cashReceived * tradingFeePercentageFraction
-                trade = {
-                    type: TradeType.Sell,
-                    amount: coinsSold,
-                    price: price,
-                    date: date
-                }
-                coinAmount -= coinsSold
-                cashAmount += cashReceived - fee
-            }
+        let buyPrice, sellPrice, shouldBuy, shouldSell
+        if (!this.hasPaperHands) {
+            buyPrice = lowerPrice
+            sellPrice = higherPrice
+            shouldBuy = price <= buyPrice && cashAmount !== 0
+            shouldSell = price >= sellPrice && coinAmount !== 0
+        } else {
+            buyPrice = higherPrice
+            sellPrice = lowerPrice
+            shouldBuy = price >= buyPrice && cashAmount !== 0
+            shouldSell = price <= sellPrice && coinAmount !== 0
         }
 
-        return { trade, newCoinAmount: coinAmount, newCashAmount: cashAmount }
+        if (shouldBuy) {
+            ;({ trade, newCoinAmount, newCashAmount } = exchange.buy({
+                amount: this.#tradePercentageFraction * cashAmount,
+                historicalPrice: historicalPrice,
+                initialCoinAmount: coinAmount,
+                initialCashAmount: cashAmount
+            }))
+        } else if (shouldSell) {
+            ;({ trade, newCoinAmount, newCashAmount } = exchange.sell({
+                amount: this.#tradePercentageFraction * coinAmount,
+                historicalPrice: historicalPrice,
+                initialCoinAmount: coinAmount,
+                initialCashAmount: cashAmount
+            }))
+        }
+
+        return { trade, newCoinAmount, newCashAmount }
     }
 }

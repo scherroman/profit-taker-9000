@@ -2,6 +2,9 @@ import { Trade } from 'exchange'
 import { Coin } from 'coin'
 import { Strategy, Parameter } from 'strategy'
 
+/**
+ * A strategy that simply hodls through rain or shine
+ */
 export class HodlStrategy extends Strategy {
     /**
      * @param coin - Coin to use

@@ -1,5 +1,5 @@
 import { COINS } from 'coin'
-import { TradeType } from 'exchange'
+import { EXCHANGES, TradeType } from 'exchange'
 import { NaiveGridStrategy } from 'strategy'
 
 let strategy = new NaiveGridStrategy({
@@ -43,7 +43,7 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: basicPrices
         })
         let buys = trades.filter((trade) => trade.type === TradeType.Buy)
@@ -91,7 +91,7 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
 
@@ -120,7 +120,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
 
@@ -163,7 +163,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
 
@@ -179,7 +179,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 0,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
         expect(trades).toHaveLength(0)
@@ -189,7 +189,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 0,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
         expect(trades).toHaveLength(0)
@@ -198,7 +198,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             startDate: new Date(2014, 1, 1),
             endDate: new Date(2014, 2, 1),
             priceHistory: basicPrices
@@ -241,7 +241,7 @@ describe('NaiveGridStrategy.optimize', () => {
         let { all } = await strategy.optimize({
             coinAmount: 1,
             cashAmount: 1000,
-            tradingFeePercentage: 0.5,
+            exchange: EXCHANGES.coinbasePro,
             priceHistory: prices,
             parameterRanges: {
                 triggerThreshold: {

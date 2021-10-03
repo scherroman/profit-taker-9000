@@ -1,13 +1,13 @@
 import { differenceInDays, intervalToDuration, formatDuration } from 'date-fns'
 import { humanizeNumber, humanizeDate } from 'utilities'
 
-import { Trade } from 'exchange'
+import { Exchange, Trade, TradeType } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 
 export interface BacktestInput {
     coinAmount: number
     cashAmount: number
-    tradingFeePercentage: number
+    exchange: Exchange
     startDate?: Date
     endDate?: Date
     priceHistory?: PriceHistory | HistoricalPrice[]
@@ -24,7 +24,7 @@ export class BacktestResults {
     endingCashAmount: number
     trades: Trade[]
     priceHistory: PriceHistory
-    hodlComparison?: BacktestResults
+    exchange: Exchange
 
     /**
      * @param coin - Coin used
@@ -34,7 +34,7 @@ export class BacktestResults {
      * @param endingCashAmount - Final cash amount
      * @param trades - Trades made
      * @param priceHistory - Price history over which trading was performed
-     * @param hodlComparison - Hodl backtest results for comparison against these results
+     * @param exchange - Exchange on which trading was performed
      */
     constructor({
         coin,
@@ -42,23 +42,24 @@ export class BacktestResults {
         startingCashAmount,
         endingCoinAmount,
         endingCashAmount,
-        trades,
         priceHistory,
-        hodlComparison
+        exchange,
+        trades
     }: {
         coin: Coin
         startingCoinAmount: number
         startingCashAmount: number
-        priceHistory: PriceHistory
         endingCoinAmount?: number
         endingCashAmount?: number
+        priceHistory: PriceHistory
+        exchange: Exchange
         trades?: Trade[]
-        hodlComparison?: BacktestResults
     }) {
         this.coin = coin
         this.startingCoinAmount = startingCoinAmount
         this.startingCashAmount = startingCashAmount
         this.priceHistory = priceHistory
+        this.exchange = exchange
         this.endingCoinAmount = endingCoinAmount
             ? endingCoinAmount
             : startingCoinAmount
@@ -66,7 +67,6 @@ export class BacktestResults {
             ? endingCashAmount
             : startingCashAmount
         this.trades = trades ? trades : []
-        this.hodlComparison = hodlComparison
     }
 
     get profit(): number {
@@ -103,6 +103,14 @@ export class BacktestResults {
         )
     }
 
+    get buys(): Trade[] {
+        return this.trades.filter((trade) => trade.type === TradeType.Buy)
+    }
+
+    get sells(): Trade[] {
+        return this.trades.filter((trade) => trade.type === TradeType.Sell)
+    }
+
     get daysTraded(): number {
         return differenceInDays(
             this.priceHistory.endDate,
@@ -110,10 +118,59 @@ export class BacktestResults {
         )
     }
 
-    get doesBeatHodling(): boolean {
-        return this.hodlComparison
-            ? this.endingValue > this.hodlComparison.endingValue
-            : false
+    get hodlComparison(): BacktestResults {
+        return new BacktestResults({
+            coin: this.coin,
+            startingCoinAmount: this.startingCoinAmount,
+            startingCashAmount: this.startingCashAmount,
+            priceHistory: this.priceHistory,
+            exchange: this.exchange
+        })
+    }
+
+    get buyAndHodlComparison(): BacktestResults {
+        let { coin, startingCoinAmount, startingCashAmount, priceHistory } =
+            this
+
+        let { trade, newCoinAmount, newCashAmount } = this.exchange.buy({
+            amount: startingCashAmount,
+            historicalPrice: priceHistory.prices[0],
+            initialCoinAmount: startingCoinAmount,
+            initialCashAmount: startingCashAmount
+        })
+
+        return new BacktestResults({
+            coin: coin,
+            startingCoinAmount: newCoinAmount,
+            startingCashAmount: newCashAmount,
+            trades: [trade],
+            priceHistory: priceHistory,
+            exchange: this.exchange
+        })
+    }
+
+    get #comparisonToHodling(): string {
+        let comparison = 'the same as'
+
+        if (this.endingValue > this.hodlComparison.endingValue) {
+            comparison = 'better than'
+        } else if (this.endingValue < this.hodlComparison.endingValue) {
+            comparison = 'worse than'
+        }
+
+        return comparison
+    }
+
+    get #comparisonToBuyingAndHodling(): string {
+        let comparison = 'the same as'
+
+        if (this.endingValue > this.buyAndHodlComparison.endingValue) {
+            comparison = 'better than'
+        } else if (this.endingValue < this.buyAndHodlComparison.endingValue) {
+            comparison = 'worse than'
+        }
+
+        return comparison
     }
 
     get summary(): string {
@@ -123,15 +180,21 @@ export class BacktestResults {
             this.displayYield
         )}%. That's a ${humanizeNumber(this.multiplier)}x!`
 
-        if (this.hodlComparison) {
-            summary = `${summary}\nThis was ${
-                this.doesBeatHodling ? 'better' : 'worse'
-            } than simply hodling, which would have made a profit of $${humanizeNumber(
-                this.hodlComparison.profit
-            )} / ${humanizeNumber(
-                this.hodlComparison.displayYield
-            )}% / ${humanizeNumber(this.hodlComparison.multiplier)}x.`
-        }
+        summary = `${summary}\nThis was ${
+            this.#comparisonToHodling
+        } simply hodling, which would have made a profit of $${humanizeNumber(
+            this.hodlComparison.profit
+        )} / ${humanizeNumber(
+            this.hodlComparison.displayYield
+        )}% / ${humanizeNumber(this.hodlComparison.multiplier)}x.`
+
+        summary = `${summary}\nThis was ${
+            this.#comparisonToBuyingAndHodling
+        } simply buying and hodling, which would have made a profit of $${humanizeNumber(
+            this.buyAndHodlComparison.profit
+        )} / ${humanizeNumber(
+            this.buyAndHodlComparison.displayYield
+        )}% / ${humanizeNumber(this.buyAndHodlComparison.multiplier)}x.`
 
         return summary
     }
@@ -155,7 +218,9 @@ export class BacktestResults {
         } -> $${humanizeNumber(this.priceHistory.endingPrice)}/${
             this.coin.symbol
         }
-        Time: Traded ${this.trades.length} times over ${formatDuration(
+        Time: Traded ${this.trades.length} times (${this.buys.length} buys, ${
+            this.sells.length
+        } sells) over ${formatDuration(
             intervalToDuration({
                 start: this.priceHistory.startDate,
                 end: this.priceHistory.endDate

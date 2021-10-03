@@ -1,5 +1,5 @@
 import { COINS, PriceHistory } from 'coin'
-import { TradeType } from 'exchange'
+import { EXCHANGES, TradeType } from 'exchange'
 import { BacktestResults, OptimizationResults, SymbolPosition } from 'strategy'
 
 let backtestResults = new BacktestResults({
@@ -31,7 +31,8 @@ let backtestResults = new BacktestResults({
                 price: 300
             }
         ]
-    })
+    }),
+    exchange: EXCHANGES.free
 })
 
 describe('BacktestResults', () => {
@@ -58,9 +59,6 @@ describe('BacktestResults', () => {
     })
     it('calculates daysTraded correctly', () => {
         expect(backtestResults.daysTraded).toBe(364)
-    })
-    it('calculates doesBeatHodling correctly', () => {
-        expect(backtestResults.doesBeatHodling).toBe(false)
     })
 })
 

@@ -1,6 +1,6 @@
 import { getRangeCombinations } from 'utilities'
 
-import { Trade } from 'exchange'
+import { Exchange, Trade } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { BacktestInput, BacktestResults } from './backtest'
 import { Parameter, OptimizeInput, OptimizationResults } from './optimize'
@@ -23,7 +23,7 @@ export abstract class Strategy {
      * Backtest this strategy on historical prices to see what trades would have been made
      * @param coinAmount - Initial amount of coins
      * @param cashAmount - Initial amount of cash
-     * @param tradingFeePercentage - Fee charged per trade
+     * @param exchange - Exchange to trade on
      * @param startDate - Date to start trading on. Default is the first date in the price history.
      * @param endDate - Date to end trading on. Default is the last date in the price history.
      * @param priceHistory - Manually set the price history for the coin
@@ -32,7 +32,7 @@ export abstract class Strategy {
     async backtest({
         coinAmount,
         cashAmount,
-        tradingFeePercentage,
+        exchange,
         startDate,
         endDate,
         priceHistory
@@ -42,27 +42,20 @@ export abstract class Strategy {
             startDate,
             endDate
         })
-
         let results = new BacktestResults({
             coin: this.coin,
             startingCoinAmount: coinAmount,
             startingCashAmount: cashAmount,
             priceHistory,
-            hodlComparison: new BacktestResults({
-                coin: this.coin,
-                startingCoinAmount: coinAmount,
-                startingCashAmount: cashAmount,
-                priceHistory
-            })
+            exchange
         })
 
         let { trades, endingCoinAmount, endingCashAmount } = this.getTrades({
             priceHistory,
             coinAmount,
             cashAmount,
-            tradingFeePercentage
+            exchange
         })
-
         results.trades = trades
         results.endingCoinAmount = endingCoinAmount
         results.endingCashAmount = endingCashAmount
@@ -74,12 +67,12 @@ export abstract class Strategy {
         priceHistory,
         coinAmount,
         cashAmount,
-        tradingFeePercentage
+        exchange
     }: {
         priceHistory: PriceHistory
         coinAmount: number
         cashAmount: number
-        tradingFeePercentage: number
+        exchange: Exchange
     }): { trades: Trade[]; endingCoinAmount: number; endingCashAmount: number }
 
     /**

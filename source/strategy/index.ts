@@ -1,5 +1,4 @@
 export * from './strategy'
 export * from './backtest'
 export * from './optimize'
-export * from './strategies/naiveGrid'
-export * from './strategies/hodl'
+export * from './strategies'
