@@ -1,10 +1,11 @@
 import { COINS } from 'coin'
-import { EXCHANGES, TradeType } from 'exchange'
-import { NaiveGridStrategy } from 'strategy'
+import { EXCHANGES } from 'exchange'
+import { NaiveGridStrategy, ParameterRangeError } from 'strategy'
 
 let strategy = new NaiveGridStrategy({
     coin: COINS.bitcoin,
-    triggerThreshold: 10,
+    buyThreshold: 10,
+    sellThreshold: 10,
     tradePercentage: 10
 })
 
@@ -39,15 +40,15 @@ describe('NaiveGridStrategy', () => {
             startingCashAmount,
             endingCoinAmount,
             endingCashAmount,
-            trades
+            trades,
+            buys,
+            sells
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
             exchange: EXCHANGES.coinbasePro,
             priceHistory: basicPrices
         })
-        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
-        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
 
         expect(trades).toHaveLength(2)
         expect(buys).toHaveLength(1)
@@ -59,7 +60,7 @@ describe('NaiveGridStrategy', () => {
         expect(startingValue).toBeCloseTo(1768)
         expect(endingValue).toBeCloseTo(1750.3778)
         expect(profit).toBeCloseTo(-17.6222)
-        expect(percentageYield).toBeCloseTo(-0.00996731)
+        expect(percentageYield).toBeCloseTo(-0.996731)
         expect(isProfitable).toBe(false)
     })
     it("doesn't sell or buy when trigger percentages are not met", async () => {
@@ -117,15 +118,12 @@ describe('NaiveGridStrategy', () => {
             }
         ]
 
-        let { trades } = await strategy.backtest({
+        let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
             exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
-
-        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
-        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
 
         expect(trades).toHaveLength(2)
         expect(buys).toHaveLength(1)
@@ -134,7 +132,8 @@ describe('NaiveGridStrategy', () => {
     it('adapts the buy price to a multiple that mirrors the sell price multiple when the trigger threshold is 100 or more', async () => {
         let strategy = new NaiveGridStrategy({
             coin: COINS.bitcoin,
-            triggerThreshold: 400,
+            buyThreshold: 80,
+            sellThreshold: 400,
             tradePercentage: 10
         })
         let prices = [
@@ -160,15 +159,12 @@ describe('NaiveGridStrategy', () => {
             }
         ]
 
-        let { trades } = await strategy.backtest({
+        let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
             exchange: EXCHANGES.coinbasePro,
             priceHistory: prices
         })
-
-        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
-        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
 
         expect(trades).toHaveLength(3)
         expect(buys).toHaveLength(1)
@@ -195,7 +191,7 @@ describe('NaiveGridStrategy', () => {
         expect(trades).toHaveLength(0)
     })
     it('only targets historical prices between the start and end dates', async () => {
-        let { trades } = await strategy.backtest({
+        let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
             exchange: EXCHANGES.coinbasePro,
@@ -203,8 +199,6 @@ describe('NaiveGridStrategy', () => {
             endDate: new Date(2014, 2, 1),
             priceHistory: basicPrices
         })
-        let buys = trades.filter((trade) => trade.type === TradeType.Buy)
-        let sells = trades.filter((trade) => trade.type === TradeType.Sell)
 
         expect(trades).toHaveLength(1)
         expect(buys).toHaveLength(0)
@@ -212,52 +206,59 @@ describe('NaiveGridStrategy', () => {
     })
 })
 
+let optimizePrices = [
+    {
+        date: new Date(2014, 1, 1),
+        price: 100
+    },
+    {
+        date: new Date(2014, 2, 1),
+        price: 200
+    },
+    {
+        date: new Date(2014, 3, 1),
+        price: 300
+    },
+    {
+        date: new Date(2014, 3, 1),
+        price: 50
+    }
+]
+
+let optimizeStrategy = new NaiveGridStrategy({
+    coin: COINS.bitcoin,
+    buyThreshold: 10,
+    sellThreshold: 10,
+    tradePercentage: 10
+})
+
 describe('NaiveGridStrategy.optimize', () => {
     it('finds the best and worst parameter combinations', async () => {
-        let prices = [
-            {
-                date: new Date(2014, 1, 1),
-                price: 100
-            },
-            {
-                date: new Date(2014, 2, 1),
-                price: 200
-            },
-            {
-                date: new Date(2014, 3, 1),
-                price: 300
-            },
-            {
-                date: new Date(2014, 3, 1),
-                price: 50
-            }
-        ]
-        let strategy = new NaiveGridStrategy({
-            coin: COINS.bitcoin,
-            triggerThreshold: 10,
-            tradePercentage: 10
-        })
-
-        let { all } = await strategy.optimize({
+        let { all } = await optimizeStrategy.optimize({
             coinAmount: 1,
             cashAmount: 1000,
             exchange: EXCHANGES.coinbasePro,
-            priceHistory: prices,
+            priceHistory: optimizePrices,
             parameterRanges: {
-                triggerThreshold: {
+                buyThreshold: {
                     minimum: 0,
-                    maximum: 1000,
+                    maximum: 100,
+                    step: 10
+                },
+                sellThreshold: {
+                    minimum: 0,
+                    maximum: 100,
                     step: 10
                 },
                 tradePercentage: {
                     minimum: 0,
                     maximum: 100,
-                    step: 1
+                    step: 10
                 }
             }
         })
 
-        expect(all).toHaveLength(10201)
+        expect(all).toHaveLength(1331)
         let previousResult = null
         for (let result of all) {
             if (!previousResult) {
@@ -271,5 +272,49 @@ describe('NaiveGridStrategy.optimize', () => {
 
             previousResult = result
         }
+    })
+    it('throws an error if parameters are missing', async () => {
+        await expect(
+            optimizeStrategy.optimize({
+                coinAmount: 1,
+                cashAmount: 1000,
+                exchange: EXCHANGES.coinbasePro,
+                priceHistory: optimizePrices,
+                parameterRanges: {
+                    buyThreshold: {
+                        minimum: 0,
+                        maximum: 100,
+                        step: 10
+                    }
+                }
+            })
+        ).rejects.toThrow(ParameterRangeError)
+    })
+    it('throws an error if parameter ranges exceed the supported range', async () => {
+        await expect(
+            optimizeStrategy.optimize({
+                coinAmount: 1,
+                cashAmount: 1000,
+                exchange: EXCHANGES.coinbasePro,
+                priceHistory: optimizePrices,
+                parameterRanges: {
+                    buyThreshold: {
+                        minimum: 0,
+                        maximum: 101,
+                        step: 10
+                    },
+                    sellThreshold: {
+                        minimum: 0,
+                        maximum: 100,
+                        step: 10
+                    },
+                    tradePercentage: {
+                        minimum: 0,
+                        maximum: 100,
+                        step: 1
+                    }
+                }
+            })
+        ).rejects.toThrow(ParameterRangeError)
     })
 })

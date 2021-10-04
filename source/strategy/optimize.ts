@@ -4,8 +4,10 @@ import { Range } from 'utilities'
 import { BacktestInput, BacktestResults } from './backtest'
 
 export interface OptimizeInput extends BacktestInput {
-    parameterRanges: Record<string, Range>
+    parameterRanges: ParameterRanges
 }
+
+export type ParameterRanges = Record<string, Range>
 
 /**
  * Crunches all possible outcomes of a strategy given a set of parameter ranges
@@ -14,7 +16,7 @@ export class OptimizationResults {
     all: ParameterBacktestResults[]
     unsorted: ParameterBacktestResults[]
     parameters: Parameter[]
-    parameterRanges: Record<string, Range>
+    parameterRanges: ParameterRanges
 
     /**
      * @param results - Results of backtesting all parameter combinations
@@ -28,7 +30,7 @@ export class OptimizationResults {
     }: {
         results: ParameterBacktestResults[]
         parameters: Parameter[]
-        parameterRanges: Record<string, Range>
+        parameterRanges: ParameterRanges
     }) {
         this.unsorted = results
         this.all = [...results].sort((a, b) =>
@@ -264,6 +266,8 @@ export class OptimizationResults {
 
 export interface Parameter {
     name: string
+    minimum: number
+    maximum?: number
     symbol: {
         symbol: string
         position: SymbolPosition

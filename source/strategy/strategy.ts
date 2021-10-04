@@ -3,7 +3,12 @@ import { getRangeCombinations } from 'utilities'
 import { Exchange, Trade } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { BacktestInput, BacktestResults } from './backtest'
-import { Parameter, OptimizeInput, OptimizationResults } from './optimize'
+import {
+    Parameter,
+    OptimizeInput,
+    OptimizationResults,
+    ParameterRanges
+} from './optimize'
 
 /**
  * A strategy for making a series of trades given a price history
@@ -17,6 +22,15 @@ export abstract class Strategy {
      */
     constructor({ coin }: { coin: Coin }) {
         this.coin = coin
+    }
+
+    get parametersMap(): Record<string, Parameter> {
+        let parametersMap: Record<string, Parameter> = {}
+        for (let parameter of this.parameters) {
+            parametersMap[parameter.name] = parameter
+        }
+
+        return parametersMap
     }
 
     /**
@@ -87,6 +101,8 @@ export abstract class Strategy {
         priceHistory,
         ...backtestInput
     }: OptimizeInput): Promise<OptimizationResults> {
+        this.#validateParameterRanges(parameterRanges)
+
         // Create the price history up front to prevent memory overflows due to creating many copies of the price history during backtesting
         priceHistory = await this.getPriceHistory({
             priceHistory,
@@ -116,6 +132,33 @@ export abstract class Strategy {
         })
     }
 
+    #validateParameterRanges(parameterRanges: ParameterRanges): void {
+        for (let parameter of this.parameters) {
+            let parameterRange = parameterRanges[parameter.name]
+
+            if (!parameterRange) {
+                throw new ParameterRangeError(
+                    `Missing range for parameter ${parameter.name}`
+                )
+            }
+
+            if (parameterRange.minimum < parameter.minimum) {
+                throw new ParameterRangeError(
+                    `Parameter range minimum ${parameterRange.minimum} provided for ${parameter.name} is lower than the supported minimum ${parameter.minimum}`
+                )
+            }
+
+            if (
+                parameter.maximum &&
+                parameterRange.maximum > parameter.maximum
+            ) {
+                throw new ParameterRangeError(
+                    `Parameter range maximum ${parameterRange.maximum} provided for ${parameter.name} is larger than the supported maximum ${parameter.maximum}`
+                )
+            }
+        }
+    }
+
     async getPriceHistory({
         priceHistory,
         startDate,
@@ -141,3 +184,5 @@ export abstract class Strategy {
         return priceHistory
     }
 }
+
+export class ParameterRangeError extends Error {}

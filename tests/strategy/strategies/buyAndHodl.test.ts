@@ -53,7 +53,7 @@ describe('BuyAndHodlStrategy', () => {
         expect(startingValue).toBeCloseTo(1500)
         expect(endingValue).toBeCloseTo(3000)
         expect(profit).toBeCloseTo(1500)
-        expect(percentageYield).toBeCloseTo(1)
+        expect(percentageYield).toBeCloseTo(100)
         expect(isProfitable).toBe(true)
     })
 })

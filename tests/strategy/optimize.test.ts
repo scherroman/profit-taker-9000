@@ -35,72 +35,48 @@ let backtestResults = new BacktestResults({
     exchange: EXCHANGES.free
 })
 
-describe('BacktestResults', () => {
-    it('calculates startingValue correctly', () => {
-        expect(backtestResults.startingValue).toBe(1100)
-    })
-    it('calculates endingValue correctly', () => {
-        expect(backtestResults.endingValue).toBe(1250)
-    })
-    it('calculates profit correctly', () => {
-        expect(backtestResults.profit).toBe(150)
-    })
-    it('calculates percentageYield correctly', () => {
-        expect(backtestResults.percentageYield).toBeCloseTo(0.13636364)
-    })
-    it('calculates displayYield correctly', () => {
-        expect(backtestResults.displayYield).toBeCloseTo(13.636364)
-    })
-    it('calculates multiplier correctly', () => {
-        expect(backtestResults.multiplier).toBeCloseTo(1.13636364)
-    })
-    it('computes isProfitable correctly', () => {
-        expect(backtestResults.isProfitable).toBe(true)
-    })
-    it('calculates daysTraded correctly', () => {
-        expect(backtestResults.daysTraded).toBe(364)
-    })
-})
-
 let optimizationResults = new OptimizationResults({
     results: [
         {
-            parameterValues: { triggerThreshold: 0, tradePercentage: 0 },
+            parameterValues: { tradeThreshold: 0, tradePercentage: 0 },
             backtestResults: backtestResults
         },
         {
-            parameterValues: { triggerThreshold: 0, tradePercentage: 10 },
+            parameterValues: { tradeThreshold: 0, tradePercentage: 10 },
             backtestResults: backtestResults
         },
         {
-            parameterValues: { triggerThreshold: 1, tradePercentage: 0 },
+            parameterValues: { tradeThreshold: 1, tradePercentage: 0 },
             backtestResults: backtestResults
         },
         {
-            parameterValues: { triggerThreshold: 1, tradePercentage: 10 },
+            parameterValues: { tradeThreshold: 1, tradePercentage: 10 },
             backtestResults: backtestResults
         },
         {
-            parameterValues: { triggerThreshold: 2, tradePercentage: 0 },
+            parameterValues: { tradeThreshold: 2, tradePercentage: 0 },
             backtestResults: backtestResults
         },
         {
-            parameterValues: { triggerThreshold: 2, tradePercentage: 10 },
+            parameterValues: { tradeThreshold: 2, tradePercentage: 10 },
             backtestResults: backtestResults
         }
     ],
     parameters: [
         {
-            name: 'triggerThreshold',
+            name: 'tradeThreshold',
+            minimum: 0,
             symbol: { symbol: '%', position: SymbolPosition.Suffix }
         },
         {
             name: 'tradePercentage',
+            minimum: 0,
+            maximum: 100,
             symbol: { symbol: '%', position: SymbolPosition.Suffix }
         }
     ],
     parameterRanges: {
-        triggerThreshold: {
+        tradeThreshold: {
             minimum: 0,
             maximum: 2,
             step: 1
@@ -129,7 +105,7 @@ let scatterPlot3dData = {
     z: [150, 150, 150, 150, 150, 150]
 }
 
-describe('OptimizationResults.', () => {
+describe('OptimizationResults.get3dPlotData', () => {
     it('generates countour plot data', () => {
         expect(
             optimizationResults.get3dPlotData({ type: 'Contour' })

@@ -4,38 +4,51 @@ import { Strategy, Parameter, SymbolPosition } from 'strategy'
 import { round } from 'utilities'
 
 /**
- * A strategy that trades whenever the price of the coin changes by a certain percentage
+ * A strategy that simply trades whenever the price of a coin changes by a certain percentage
  * It's naive because it can end up buying all the way down and selling lower when the price goes up just a little
  */
 export class NaiveGridStrategy extends Strategy {
-    triggerThreshold: number
+    buyThreshold: number
+    sellThreshold: number
     tradePercentage: number
     hasPaperHands: boolean
     parameters: Parameter[] = [
         {
-            name: 'triggerThreshold',
+            name: 'buyThreshold',
+            minimum: 0,
+            maximum: 100,
+            symbol: { symbol: '%', position: SymbolPosition.Suffix }
+        },
+        {
+            name: 'sellThreshold',
+            minimum: 0,
             symbol: { symbol: '%', position: SymbolPosition.Suffix }
         },
         {
             name: 'tradePercentage',
+            minimum: 0,
+            maximum: 100,
             symbol: { symbol: '%', position: SymbolPosition.Suffix }
         }
     ]
 
     /**
      * @param coin - Coin to use
-     * @param triggerThreshold - Percentage change in coin price that should trigger a trade
+     * @param buyThreshold - Percentage drop in coin price that should trigger a buy
+     * @param sellThreshold - Percentage rise in coin price that should trigger a sell
      * @param tradePercentage - Percentage of the currently held coin or cash that should be traded
      * @param hasPaperHands - Reverses the strategy to buy high and sell low like a paper-handed fool
      */
     constructor({
         coin,
-        triggerThreshold,
+        buyThreshold,
+        sellThreshold,
         tradePercentage,
         hasPaperHands = false
     }: {
         coin: Coin
-        triggerThreshold: number
+        buyThreshold: number
+        sellThreshold: number
         tradePercentage: number
         hasPaperHands?: boolean
     }) {
@@ -47,17 +60,38 @@ export class NaiveGridStrategy extends Strategy {
             )
         }
 
-        this.triggerThreshold = triggerThreshold
+        this.buyThreshold = buyThreshold
+        this.sellThreshold = sellThreshold
         this.tradePercentage = tradePercentage
         this.hasPaperHands = hasPaperHands
     }
 
-    get #triggerThresholdFraction(): number {
-        return this.triggerThreshold / 100
+    get #buyThresholdFraction(): number {
+        return this.buyThreshold / 100
+    }
+
+    get #sellThresholdFraction(): number {
+        return this.sellThreshold / 100
+    }
+
+    get #buyThresholdMultiple(): number {
+        return 1 - this.#buyThresholdFraction
+    }
+
+    get #sellThresholdMultiple(): number {
+        return 1 + this.#sellThresholdFraction
     }
 
     get #tradePercentageFraction(): number {
         return this.tradePercentage / 100
+    }
+
+    #getBuyPrice(referencePrice: number): number {
+        return round(referencePrice * this.#buyThresholdMultiple, 2)
+    }
+
+    #getSellPrice(referencePrice: number): number {
+        return round(referencePrice * this.#sellThresholdMultiple, 2)
     }
 
     protected getTrades({
@@ -77,20 +111,25 @@ export class NaiveGridStrategy extends Strategy {
     } {
         let trades = []
         let referencePrice = priceHistory.startingPrice
+        let buyPrice = this.#getBuyPrice(referencePrice)
+        let sellPrice = this.#getSellPrice(referencePrice)
 
         for (let historicalPrice of priceHistory.prices) {
             let { trade, newCoinAmount, newCashAmount } = this.#getTrade({
                 historicalPrice,
-                referencePrice,
+                buyPrice,
+                sellPrice,
                 coinAmount,
                 cashAmount,
                 exchange
             })
             if (trade) {
                 trades.push(trade)
-                referencePrice = trade.price
                 coinAmount = newCoinAmount
                 cashAmount = newCashAmount
+                referencePrice = trade.price
+                buyPrice = this.#getBuyPrice(referencePrice)
+                sellPrice = this.#getSellPrice(referencePrice)
             }
         }
 
@@ -103,13 +142,15 @@ export class NaiveGridStrategy extends Strategy {
 
     #getTrade({
         historicalPrice,
-        referencePrice,
+        buyPrice,
+        sellPrice,
         coinAmount,
         cashAmount,
         exchange
     }: {
         historicalPrice: HistoricalPrice
-        referencePrice: number
+        buyPrice: number
+        sellPrice: number
         coinAmount: number
         cashAmount: number
         exchange: Exchange
@@ -117,28 +158,17 @@ export class NaiveGridStrategy extends Strategy {
         let trade
         let newCoinAmount = coinAmount
         let newCashAmount = cashAmount
+        let { price } = historicalPrice
 
-        let price = historicalPrice.price
-        let multiple = 1 + this.#triggerThresholdFraction
-
-        let higherPrice = round(referencePrice * multiple, 2)
-        let lowerPrice = round(
-            this.#triggerThresholdFraction < 1
-                ? referencePrice * (1 - this.#triggerThresholdFraction)
-                : referencePrice / multiple,
-            2
-        )
-        let buyPrice, sellPrice, shouldBuy, shouldSell
+        let shouldBuy, shouldSell
         if (!this.hasPaperHands) {
-            buyPrice = lowerPrice
-            sellPrice = higherPrice
+            // Buy low, sell high
             shouldBuy = price <= buyPrice && cashAmount !== 0
             shouldSell = price >= sellPrice && coinAmount !== 0
         } else {
-            buyPrice = higherPrice
-            sellPrice = lowerPrice
-            shouldBuy = price >= buyPrice && cashAmount !== 0
-            shouldSell = price <= sellPrice && coinAmount !== 0
+            // Buy high, sell low
+            shouldBuy = price >= sellPrice && cashAmount !== 0
+            shouldSell = price <= buyPrice && coinAmount !== 0
         }
 
         if (shouldBuy) {

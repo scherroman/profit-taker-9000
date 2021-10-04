@@ -53,7 +53,7 @@ describe('NaiveGridStrategy', () => {
         expect(startingValue).toBeCloseTo(1768)
         expect(endingValue).toBeCloseTo(2050)
         expect(profit).toBeCloseTo(282)
-        expect(percentageYield).toBeCloseTo(0.15950226)
+        expect(percentageYield).toBeCloseTo(15.950226)
         expect(isProfitable).toBe(true)
     })
 })

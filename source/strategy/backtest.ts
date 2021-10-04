@@ -73,16 +73,16 @@ export class BacktestResults {
         return this.endingValue - this.startingValue
     }
 
-    get percentageYield(): number {
+    get percentageYieldFraction(): number {
         return this.profit / this.startingValue
     }
 
-    get displayYield(): number {
-        return this.percentageYield * 100
+    get percentageYield(): number {
+        return this.percentageYieldFraction * 100
     }
 
     get multiplier(): number {
-        return 1.0 + this.percentageYield
+        return 1.0 + this.percentageYieldFraction
     }
 
     get isProfitable(): boolean {
@@ -177,7 +177,7 @@ export class BacktestResults {
         let summary = `This strategy made a profit of $${humanizeNumber(
             this.profit
         )}, with a yield of ${humanizeNumber(
-            this.displayYield
+            this.percentageYield
         )}%. That's a ${humanizeNumber(this.multiplier)}x!`
 
         summary = `${summary}\nThis was ${
@@ -185,7 +185,7 @@ export class BacktestResults {
         } simply hodling, which would have made a profit of $${humanizeNumber(
             this.hodlComparison.profit
         )} / ${humanizeNumber(
-            this.hodlComparison.displayYield
+            this.hodlComparison.percentageYield
         )}% / ${humanizeNumber(this.hodlComparison.multiplier)}x.`
 
         summary = `${summary}\nThis was ${
@@ -193,7 +193,7 @@ export class BacktestResults {
         } simply buying and hodling, which would have made a profit of $${humanizeNumber(
             this.buyAndHodlComparison.profit
         )} / ${humanizeNumber(
-            this.buyAndHodlComparison.displayYield
+            this.buyAndHodlComparison.percentageYield
         )}% / ${humanizeNumber(this.buyAndHodlComparison.multiplier)}x.`
 
         return summary
@@ -202,7 +202,7 @@ export class BacktestResults {
     get description(): string {
         return `
         Profit: $${humanizeNumber(this.profit)} / ${humanizeNumber(
-            this.displayYield
+            this.percentageYield
         )}% / ${humanizeNumber(this.multiplier)}x
         Value: $${humanizeNumber(this.startingValue)} -> $${humanizeNumber(
             this.endingValue
