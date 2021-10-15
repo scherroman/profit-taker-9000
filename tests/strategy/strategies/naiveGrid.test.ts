@@ -6,7 +6,8 @@ let strategy = new NaiveGridStrategy({
     coin: COINS.bitcoin,
     buyThreshold: 10,
     sellThreshold: 10,
-    tradePercentage: 10
+    buyPercentage: 10,
+    sellPercentage: 10
 })
 
 let basicPrices = [
@@ -134,7 +135,8 @@ describe('NaiveGridStrategy', () => {
             coin: COINS.bitcoin,
             buyThreshold: 80,
             sellThreshold: 400,
-            tradePercentage: 10
+            buyPercentage: 10,
+            sellPercentage: 10
         })
         let prices = [
             {
@@ -229,7 +231,8 @@ let optimizeStrategy = new NaiveGridStrategy({
     coin: COINS.bitcoin,
     buyThreshold: 10,
     sellThreshold: 10,
-    tradePercentage: 10
+    buyPercentage: 10,
+    sellPercentage: 10
 })
 
 describe('NaiveGridStrategy.optimize', () => {
@@ -250,7 +253,12 @@ describe('NaiveGridStrategy.optimize', () => {
                     maximum: 100,
                     step: 10
                 },
-                tradePercentage: {
+                buyPercentage: {
+                    minimum: 0,
+                    maximum: 100,
+                    step: 10
+                },
+                sellPercentage: {
                     minimum: 0,
                     maximum: 100,
                     step: 10
@@ -258,7 +266,7 @@ describe('NaiveGridStrategy.optimize', () => {
             }
         })
 
-        expect(all).toHaveLength(1331)
+        expect(all).toHaveLength(14641)
         let previousResult = null
         for (let result of all) {
             if (!previousResult) {

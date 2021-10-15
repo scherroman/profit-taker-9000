@@ -1,4 +1,4 @@
-import { Exchange, Trade } from 'exchange'
+import { Exchange, Trade, TradeType } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { Strategy, Parameter, SymbolPosition } from 'strategy'
 import { round } from 'utilities'
@@ -7,7 +7,7 @@ import { round } from 'utilities'
  * A strategy that simply trades whenever the price of a coin changes by a certain percentage
  * It's naive because it can end up buying all the way down and selling lower when the price goes up just a little
  */
-export class NaiveGridStrategy extends Strategy {
+export class OptimisticGridStrategy extends Strategy {
     buyThreshold: number
     sellThreshold: number
     buyPercentage: number
@@ -148,9 +148,13 @@ export class NaiveGridStrategy extends Strategy {
                 trades.push(trade)
                 coinAmount = newCoinAmount
                 cashAmount = newCashAmount
-                referencePrice = trade.price
-                buyPrice = this.#getBuyPrice(referencePrice)
-                sellPrice = this.#getSellPrice(referencePrice)
+                if (trade.type === TradeType.Sell) {
+                    referencePrice = trade.price
+                    buyPrice = this.#getBuyPrice(referencePrice)
+                    sellPrice = this.#getSellPrice(referencePrice)
+                } else {
+                    buyPrice = trade.price * this.#buyThresholdFraction
+                }
             }
         }
 
