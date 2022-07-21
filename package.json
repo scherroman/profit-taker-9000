@@ -16,11 +16,11 @@
     "scripts": {
         "lint": "eslint source tests --ext .ts",
         "typecheck": "tsc --noEmit",
+        "test": "jest",
+        "run": "ts-node -r tsconfig-paths/register",
         "prebuild": "rm -rf build",
         "build": "tsc",
         "postbuild": "cp -r ./data ./build/",
-        "test": "jest",
-        "run": "ts-node -r tsconfig-paths/register",
         "prepare": "husky install",
         "precommit": "npm run lint && npm run typecheck && npm run test"
     },

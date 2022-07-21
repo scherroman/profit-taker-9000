@@ -206,6 +206,48 @@ describe('NaiveGridStrategy', () => {
         expect(buys).toHaveLength(0)
         expect(sells).toHaveLength(1)
     })
+    it('throws an error if incorrect parameter values are provided', async () => {
+        expect(
+            () =>
+                new NaiveGridStrategy({
+                    coin: COINS.bitcoin,
+                    buyThreshold: -10,
+                    sellThreshold: 10,
+                    buyPercentage: 10,
+                    sellPercentage: 10
+                })
+        ).toThrow(ParameterRangeError)
+        expect(
+            () =>
+                new NaiveGridStrategy({
+                    coin: COINS.bitcoin,
+                    buyThreshold: 10,
+                    sellThreshold: -10,
+                    buyPercentage: 10,
+                    sellPercentage: 10
+                })
+        ).toThrow(ParameterRangeError)
+        expect(
+            () =>
+                new NaiveGridStrategy({
+                    coin: COINS.bitcoin,
+                    buyThreshold: 10,
+                    sellThreshold: 10,
+                    buyPercentage: -10,
+                    sellPercentage: 10
+                })
+        ).toThrow(ParameterRangeError)
+        expect(
+            () =>
+                new NaiveGridStrategy({
+                    coin: COINS.bitcoin,
+                    buyThreshold: 10,
+                    sellThreshold: 10,
+                    buyPercentage: 10,
+                    sellPercentage: -10
+                })
+        ).toThrow(ParameterRangeError)
+    })
 })
 
 let optimizePrices = [

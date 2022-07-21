@@ -24,15 +24,6 @@ export abstract class Strategy {
         this.coin = coin
     }
 
-    get parametersMap(): Record<string, Parameter> {
-        let parametersMap: Record<string, Parameter> = {}
-        for (let parameter of this.parameters) {
-            parametersMap[parameter.name] = parameter
-        }
-
-        return parametersMap
-    }
-
     /**
      * Backtest this strategy on historical prices to see what trades would have been made
      * @param coinAmount - Initial amount of coins
@@ -130,6 +121,18 @@ export abstract class Strategy {
             parameters: this.parameters,
             parameterRanges
         })
+    }
+
+    protected validateParameter(
+        parameterValue: number,
+        parameter: Parameter
+    ): void {
+        let { minimum, maximum } = parameter
+        if (parameterValue < minimum || (maximum && parameterValue > maximum)) {
+            throw new ParameterRangeError(
+                `Invalid ${parameter.name} ${parameterValue}. Value must be between ${minimum} and ${maximum}`
+            )
+        }
     }
 
     #validateParameterRanges(parameterRanges: ParameterRanges): void {
