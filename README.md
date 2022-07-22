@@ -50,6 +50,12 @@ npm run lint
 npm run typecheck
 ```
 
+**Run all static checks (linter and typechecker)**
+
+```
+npm run staticcheck
+```
+
 **Run the test suite**
 
 ```

@@ -1,37 +1,12 @@
 import { Exchange, Trade, TradeType } from 'exchange'
-import { Coin, PriceHistory } from 'coin'
-import { Grid } from 'strategy/strategies/grid'
+import { PriceHistory } from 'coin'
+import { GridStrategy } from 'strategy/strategies/grid'
 
 /**
- * An optimistic strategy that trades whenever the price of a coin changes by a certain percentage relative to the last sell price.
+ * An optimistic strategy that trades when the price of a coin changes by a certain percentage relative to the last sell price.
  * It's optimistic because it continues to buy as prices fall, but waits to sell until prices rise to surpass the last sell price.
  */
-export class OptimisticGridStrategy extends Grid {
-    constructor({
-        coin,
-        buyThreshold,
-        sellThreshold,
-        buyPercentage,
-        sellPercentage,
-        hasPaperHands = false
-    }: {
-        coin: Coin
-        buyThreshold: number
-        sellThreshold: number
-        buyPercentage: number
-        sellPercentage: number
-        hasPaperHands?: boolean
-    }) {
-        super({
-            coin,
-            buyThreshold,
-            sellThreshold,
-            buyPercentage,
-            sellPercentage,
-            hasPaperHands
-        })
-    }
-
+export class OptimisticGridStrategy extends GridStrategy {
     getTrades({
         priceHistory,
         coinAmount,

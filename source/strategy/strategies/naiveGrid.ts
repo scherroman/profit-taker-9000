@@ -1,37 +1,12 @@
 import { Exchange, Trade } from 'exchange'
-import { Coin, PriceHistory } from 'coin'
-import { Grid } from 'strategy/strategies/grid'
+import { PriceHistory } from 'coin'
+import { GridStrategy } from 'strategy/strategies/grid'
 
 /**
- * A strategy that simply trades whenever the price of a coin changes by a certain percentage
- * It's naive because it doesn't pay attention to cost basis, and can end up buying all the way down then actually selling lower when the price goes up just a little
+ * A strategy that simply trades when the price of a coin changes by a certain percentage.
+ * It's naive because it doesn't pay attention to cost basis, and can end up buying all the way down then actually selling lower when the price goes up just a little.
  */
-export class NaiveGridStrategy extends Grid {
-    constructor({
-        coin,
-        buyThreshold,
-        sellThreshold,
-        buyPercentage,
-        sellPercentage,
-        hasPaperHands = false
-    }: {
-        coin: Coin
-        buyThreshold: number
-        sellThreshold: number
-        buyPercentage: number
-        sellPercentage: number
-        hasPaperHands?: boolean
-    }) {
-        super({
-            coin,
-            buyThreshold,
-            sellThreshold,
-            buyPercentage,
-            sellPercentage,
-            hasPaperHands
-        })
-    }
-
+export class NaiveGridStrategy extends GridStrategy {
     getTrades({
         priceHistory,
         coinAmount,

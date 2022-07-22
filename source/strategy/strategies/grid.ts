@@ -29,10 +29,19 @@ const PARAMETERS = {
     }
 }
 
+export interface GridStrategyParameters {
+    coin: Coin
+    buyThreshold: number
+    sellThreshold: number
+    buyPercentage: number
+    sellPercentage: number
+    hasPaperHands?: boolean
+}
+
 /**
  * A strategy for making a series of trades based on percentage changes in price
  */
-export abstract class Grid extends Strategy {
+export abstract class GridStrategy extends Strategy {
     buyThreshold: number
     sellThreshold: number
     buyPercentage: number
@@ -59,15 +68,8 @@ export abstract class Grid extends Strategy {
         sellThreshold,
         buyPercentage,
         sellPercentage,
-        hasPaperHands
-    }: {
-        coin: Coin
-        buyThreshold: number
-        sellThreshold: number
-        buyPercentage: number
-        sellPercentage: number
-        hasPaperHands: boolean
-    }) {
+        hasPaperHands = false
+    }: GridStrategyParameters) {
         super({ coin })
 
         this.validateParameter(buyThreshold, PARAMETERS.buyThreshold)
