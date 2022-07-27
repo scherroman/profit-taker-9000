@@ -1,4 +1,5 @@
 import fs from 'fs'
+import util from 'util'
 import { Range } from 'utilities'
 
 import { BacktestInput, BacktestResults } from './backtest'
@@ -282,9 +283,36 @@ export enum SymbolPosition {
     Suffix = 'Suffix'
 }
 
-interface ParameterBacktestResults {
+export class ParameterBacktestResults {
     parameterValues: Record<string, number>
     backtestResults: BacktestResults
+
+    /**
+     * @param parameterValues - Parameter values used for the backtest
+     * @param backtestResults - Results for the backtest using these parameters
+     */
+    constructor({
+        parameterValues,
+        backtestResults
+    }: {
+        parameterValues: Record<string, number>
+        backtestResults: BacktestResults
+    }) {
+        this.parameterValues = parameterValues
+        this.backtestResults = backtestResults
+    }
+
+    get description(): string {
+        let description = `Best:${util.inspect(
+            this.parameterValues,
+            false,
+            null,
+            true
+        )}`
+        description += `\n\n${this.backtestResults.description}`
+
+        return description
+    }
 }
 
 export enum PlotType {

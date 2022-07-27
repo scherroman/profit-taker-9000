@@ -6,14 +6,6 @@ import { PriceHistory } from 'coin'
 import { SymbolPosition } from '../'
 import { GridStrategy, GridStrategyParameters } from './grid'
 
-const PARAMETERS = {
-    costBasis: {
-        name: 'costBasis',
-        minimum: 0,
-        symbol: { symbol: '$', position: SymbolPosition.Suffix }
-    }
-}
-
 /**
  * A strategy that trades when the price of a coin changes by a certain percentage relative to the current cost basis.
  * Prevents undesireable repeated buying and selling after crossing a buy or sell threshold by increasing the threshold by a factor of 2 until an opposing sell or buy is made, respectively.
@@ -162,5 +154,13 @@ export class CostBasisGridStrategy extends GridStrategy {
         }
 
         return costBasis
+    }
+}
+
+const PARAMETERS = {
+    costBasis: {
+        name: 'costBasis',
+        minimum: 0,
+        symbol: { symbol: '$', position: SymbolPosition.Suffix }
     }
 }

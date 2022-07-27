@@ -7,7 +7,8 @@ import {
     Parameter,
     ParameterRanges,
     OptimizeInput,
-    OptimizationResults
+    OptimizationResults,
+    ParameterBacktestResults
 } from './optimize'
 
 /**
@@ -107,13 +108,15 @@ export abstract class Strategy {
             for (let [key, value] of Object.entries(parameterCombination)) {
                 Object.assign(this, { [key]: value })
             }
-            parameterBacktestResults.push({
-                parameterValues: parameterCombination,
-                backtestResults: await this.backtest({
-                    priceHistory,
-                    ...backtestInput
+            parameterBacktestResults.push(
+                new ParameterBacktestResults({
+                    parameterValues: parameterCombination,
+                    backtestResults: await this.backtest({
+                        priceHistory,
+                        ...backtestInput
+                    })
                 })
-            })
+            )
         }
 
         return new OptimizationResults({

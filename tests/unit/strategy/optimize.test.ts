@@ -1,6 +1,11 @@
 import { COINS, PriceHistory } from 'coin'
 import { EXCHANGES, TradeType } from 'exchange'
-import { BacktestResults, OptimizationResults, SymbolPosition } from 'strategy'
+import {
+    BacktestResults,
+    OptimizationResults,
+    SymbolPosition,
+    ParameterBacktestResults
+} from 'strategy'
 
 let backtestResults = new BacktestResults({
     coin: COINS.bitcoin,
@@ -37,30 +42,30 @@ let backtestResults = new BacktestResults({
 
 let optimizationResults = new OptimizationResults({
     results: [
-        {
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 0, tradePercentage: 0 },
             backtestResults: backtestResults
-        },
-        {
+        }),
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 0, tradePercentage: 10 },
             backtestResults: backtestResults
-        },
-        {
+        }),
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 1, tradePercentage: 0 },
             backtestResults: backtestResults
-        },
-        {
+        }),
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 1, tradePercentage: 10 },
             backtestResults: backtestResults
-        },
-        {
+        }),
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 2, tradePercentage: 0 },
             backtestResults: backtestResults
-        },
-        {
+        }),
+        new ParameterBacktestResults({
             parameterValues: { tradeThreshold: 2, tradePercentage: 10 },
             backtestResults: backtestResults
-        }
+        })
     ],
     parameters: [
         {

@@ -1,3 +1,4 @@
+import util from 'util'
 import { differenceInDays, intervalToDuration, formatDuration } from 'date-fns'
 
 import { humanizeNumber, humanizeDate } from 'utilities'
@@ -173,6 +174,19 @@ export class BacktestResults {
         return comparison
     }
 
+    get description(): string {
+        let description = this.summary
+        description += `\n\n${this.numbersDescription}`
+        description += `\n\nTrades: ${util.inspect(
+            this.trades,
+            false,
+            null,
+            true
+        )}`
+
+        return description
+    }
+
     get summary(): string {
         let summary = `This strategy made a profit of $${humanizeNumber(
             this.profit
@@ -199,36 +213,42 @@ export class BacktestResults {
         return summary
     }
 
-    get description(): string {
-        return `
-        Profit: $${humanizeNumber(this.profit)} / ${humanizeNumber(
-            this.percentageYield
-        )}% / ${humanizeNumber(this.multiplier)}x
-        Value: $${humanizeNumber(this.startingValue)} -> $${humanizeNumber(
-            this.endingValue
-        )}
-        Amount: ${this.startingCoinAmount} ${
+    get numbersDescription(): string {
+        let description = `Profit: $${humanizeNumber(
+            this.profit
+        )} / ${humanizeNumber(this.percentageYield)}% / ${humanizeNumber(
+            this.multiplier
+        )}x`
+
+        description += `\n Value: $${humanizeNumber(
+            this.startingValue
+        )} -> $${humanizeNumber(this.endingValue)}`
+
+        description += `\nAmount: ${this.startingCoinAmount} ${
             this.coin.symbol
         } / $${humanizeNumber(this.startingCashAmount)} -> ${humanizeNumber(
             this.endingCoinAmount,
             8
-        )} ${this.coin.symbol} / $${humanizeNumber(this.endingCashAmount)}
-        Price: $${humanizeNumber(this.priceHistory.startingPrice)}/${
-            this.coin.symbol
-        } -> $${humanizeNumber(this.priceHistory.endingPrice)}/${
-            this.coin.symbol
-        }
-        Time: Traded ${this.trades.length} times (${this.buys.length} buys, ${
-            this.sells.length
-        } sells) over ${formatDuration(
+        )} ${this.coin.symbol} / $${humanizeNumber(this.endingCashAmount)}`
+
+        description += `\n Price: $${humanizeNumber(
+            this.priceHistory.startingPrice
+        )}/${this.coin.symbol} -> $${humanizeNumber(
+            this.priceHistory.endingPrice
+        )}/${this.coin.symbol}`
+
+        description += `\nTrades: ${this.trades.length} trades (${this.buys.length} buys, ${this.sells.length} sells)`
+
+        description += `\n  Time: ${formatDuration(
             intervalToDuration({
                 start: this.priceHistory.startDate,
                 end: this.priceHistory.endDate
             }),
-            { delimiter: ', ' }
-        )} from ${humanizeDate(this.priceHistory.startDate)} to ${humanizeDate(
+            { format: ['years', 'months', 'days'], delimiter: ', ' }
+        )} (${humanizeDate(this.priceHistory.startDate)} to ${humanizeDate(
             this.priceHistory.endDate
-        )}
-        `
+        )})`
+
+        return description
     }
 }
