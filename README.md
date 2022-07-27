@@ -7,6 +7,8 @@
 
 ```
 
+Profit-Taker 9000 offers the ultimate insight you need to become a bona fide cryptolord. Backtest your strategy or let Profit-Taker 9000 reveal the _proper_ parameters you _should_ have used to have bought the bottom and sold the top. Put your trust in Profit-Taker 9000 and you'll be cruising in the lambo of your dreams in no time.
+
 ## Setup
 
 **1. Download and open the repository**

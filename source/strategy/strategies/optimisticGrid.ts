@@ -1,6 +1,6 @@
 import { Exchange, Trade, TradeType } from 'exchange'
 import { PriceHistory } from 'coin'
-import { GridStrategy } from 'strategy/strategies/grid'
+import { GridStrategy } from './grid'
 
 /**
  * An optimistic strategy that trades when the price of a coin changes by a certain percentage relative to the last sell price.

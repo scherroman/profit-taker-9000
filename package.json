@@ -8,38 +8,47 @@
         "type": "git",
         "url": "https://github.com/scherroman/profit-taker-9000.git"
     },
-    "main": "build/index.js",
-    "types": "build/index.d.ts",
+    "main": "build/source/index.js",
+    "types": "build/source/index.d.ts",
     "files": [
-        "/build"
+        "build/**/*",
+        "binaries/**/*",
+        "source/**/*"
     ],
+    "bin": {
+        "profit-taker-9000": "binaries/commandLineInterface.js"
+    },
     "scripts": {
-        "lint": "eslint source tests --ext .ts",
+        "lint": "eslint source binaries tests --ext .ts",
         "typecheck": "tsc --noEmit",
         "staticcheck": "npm run lint && npm run typecheck",
         "test": "jest",
         "run": "ts-node -r tsconfig-paths/register",
         "prebuild": "rm -rf build",
-        "build": "tsc",
-        "postbuild": "cp -r ./data ./build/",
-        "prepare": "husky install",
-        "precommit": "npm run lint && npm run typecheck && npm run test"
+        "build": "tsc -p ./tsconfig.build.json",
+        "check": "npm run staticcheck && npm run test && npm run build",
+        "prepare": "ts-patch install -s && husky install",
+        "precommit": "npm run check"
     },
     "devDependencies": {
-        "@types/jest": "27.0.1",
-        "@typescript-eslint/eslint-plugin": "4.29.2",
-        "eslint": "7.32.0",
-        "eslint-plugin-jest": "24.4.0",
+        "@types/jest": "28.1.6",
+        "@typescript-eslint/eslint-plugin": "5.31.0",
+        "eslint": "8.20.0",
+        "eslint-plugin-jest": "26.6.0",
         "husky": "7.0.2",
-        "jest": "27.0.6",
+        "jest": "28.1.3",
         "prettier": "2.3.2",
-        "ts-jest": "27.0.5",
-        "ts-node": "10.2.1",
+        "ts-jest": "28.0.7",
+        "ts-node": "10.9.1",
+        "ts-patch": "2.0.1",
         "tsconfig-paths": "3.11.0",
-        "typescript": "4.3.5"
+        "typescript": "4.7.4",
+        "typescript-transform-paths": "3.3.1"
     },
     "dependencies": {
+        "axios": "0.27.2",
         "csv": "5.5.2",
-        "date-fns": "2.23.0"
+        "date-fns": "2.23.0",
+        "yargs": "17.5.1"
     }
 }

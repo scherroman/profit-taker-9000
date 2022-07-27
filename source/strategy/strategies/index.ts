@@ -1,5 +1,6 @@
 export * from './hodl'
 export * from './buyAndHodl'
+export * from './grid'
 export * from './naiveGrid'
 export * from './optimisticGrid'
 export * from './costBasisGrid'

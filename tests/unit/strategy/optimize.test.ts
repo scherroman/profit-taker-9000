@@ -106,7 +106,7 @@ let scatterPlot3dData = {
 }
 
 describe('OptimizationResults.get3dPlotData', () => {
-    it('generates countour plot data', () => {
+    it('generates contour plot data', () => {
         expect(
             optimizationResults.get3dPlotData({ type: 'Contour' })
         ).toMatchObject(plot3dData)

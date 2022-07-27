@@ -1,6 +1,6 @@
 import { Exchange, Trade } from 'exchange'
 import { Coin, PriceHistory } from 'coin'
-import { Strategy, Parameter } from 'strategy'
+import { Strategy, Parameter } from '../'
 
 /**
  * A strategy that simply buys and then hodls through rain or shine

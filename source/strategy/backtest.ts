@@ -1,6 +1,6 @@
 import { differenceInDays, intervalToDuration, formatDuration } from 'date-fns'
-import { humanizeNumber, humanizeDate } from 'utilities'
 
+import { humanizeNumber, humanizeDate } from 'utilities'
 import { Exchange, Trade, TradeType } from 'exchange'
 import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 

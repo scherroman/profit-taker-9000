@@ -3,12 +3,6 @@ import { Range } from 'utilities'
 
 import { BacktestInput, BacktestResults } from './backtest'
 
-export interface OptimizeInput extends BacktestInput {
-    parameterRanges: ParameterRanges
-}
-
-export type ParameterRanges = Record<string, Range>
-
 /**
  * Crunches all possible outcomes of a strategy given a set of parameter ranges
  */
@@ -222,9 +216,12 @@ export class OptimizationResults {
 
     #buildHoverTemplate(parameters: Parameter[]): string {
         let template = ''
+
         let variablesForIndexes: Record<number, string> = {
+            /* eslint-disable @typescript-eslint/naming-convention */
             0: 'x',
             1: 'y'
+            /* eslint-enable @typescript-eslint/naming-convention */
         }
         for (let [index, parameter] of parameters.entries()) {
             let variableForIndex = variablesForIndexes[index]
@@ -263,6 +260,12 @@ export class OptimizationResults {
         }
     }
 }
+
+export interface OptimizeInput extends BacktestInput {
+    parameterRanges: ParameterRanges
+}
+
+export type ParameterRanges = Record<string, Range>
 
 export interface Parameter {
     name: string

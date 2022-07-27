@@ -34,13 +34,13 @@ describe('round', () => {
 
 describe('humanizeNumber', () => {
     it('humanizes a number to a human-readable format: two decimal places with commas', () => {
-        expect(humanizeNumber(2012930.109833492494)).toBe('2,012,930.11')
+        expect(humanizeNumber(2012930.1098334924)).toBe('2,012,930.11')
         expect(humanizeNumber(2012930.1)).toBe('2,012,930.1')
         expect(humanizeNumber(2012930)).toBe('2,012,930')
         expect(humanizeNumber(10)).toBe('10')
     })
     it('uses the decimal places provided', () => {
-        expect(humanizeNumber(2012930.109833492494, 5)).toBe('2,012,930.10983')
+        expect(humanizeNumber(2012930.1098334924, 5)).toBe('2,012,930.10983')
     })
 })
 

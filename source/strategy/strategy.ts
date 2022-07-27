@@ -5,9 +5,9 @@ import { Coin, HistoricalPrice, PriceHistory } from 'coin'
 import { BacktestInput, BacktestResults } from './backtest'
 import {
     Parameter,
+    ParameterRanges,
     OptimizeInput,
-    OptimizationResults,
-    ParameterRanges
+    OptimizationResults
 } from './optimize'
 
 /**

@@ -1,6 +1,6 @@
 import { Trade } from 'exchange'
 import { Coin } from 'coin'
-import { Strategy, Parameter } from 'strategy'
+import { Strategy, Parameter } from '../'
 
 /**
  * A strategy that simply hodls through rain or shine

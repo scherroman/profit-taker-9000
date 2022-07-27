@@ -1,10 +1,10 @@
+import { subDays } from 'date-fns'
+
+import { round } from 'utilities'
 import { Exchange, Trade, TradeType } from 'exchange'
 import { PriceHistory } from 'coin'
-import { SymbolPosition } from 'strategy'
-import { GridStrategy, GridStrategyParameters } from 'strategy/strategies/grid'
-import { round } from 'utilities'
-
-import { subDays } from 'date-fns'
+import { SymbolPosition } from '../'
+import { GridStrategy, GridStrategyParameters } from './grid'
 
 const PARAMETERS = {
     costBasis: {

@@ -2,7 +2,7 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "tsconfig.json"
     },
     "env": {
         "node": true,
@@ -48,5 +48,14 @@
                 "format": ["StrictPascalCase"]
             }
           ]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["*.js"],
+            "parser": "@babel/eslint-parser",
+            "rules": {
+                "@typescript-eslint/...": "off"
+            }
+        }
+    ]
 }

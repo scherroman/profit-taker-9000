@@ -1,7 +1,7 @@
+import { round } from 'utilities'
 import { Exchange, Trade } from 'exchange'
 import { Coin, HistoricalPrice } from 'coin'
-import { Strategy, Parameter, SymbolPosition } from 'strategy'
-import { round } from 'utilities'
+import { Strategy, Parameter, SymbolPosition } from '../'
 
 const PARAMETERS = {
     buyThreshold: {

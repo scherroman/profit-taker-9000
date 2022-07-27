@@ -1,6 +1,6 @@
 import { Exchange, Trade } from 'exchange'
 import { PriceHistory } from 'coin'
-import { GridStrategy } from 'strategy/strategies/grid'
+import { GridStrategy } from './grid'
 
 /**
  * A strategy that simply trades when the price of a coin changes by a certain percentage.
