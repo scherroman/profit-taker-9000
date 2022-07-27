@@ -1,6 +1,6 @@
 import { EXCHANGES, TradeType } from 'exchange'
 
-let exchange = EXCHANGES.coinbasePro
+let exchange = EXCHANGES.COINBASE_PRO
 let historicalPrice = {
     price: 100,
     date: new Date()

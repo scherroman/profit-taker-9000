@@ -22,7 +22,7 @@ let prices = [
 ]
 
 let strategy = new HodlStrategy({
-    coin: COINS.bitcoin
+    coin: COINS.BITCOIN
 })
 
 describe('NaiveGridStrategy', () => {
@@ -41,7 +41,7 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.free,
+            exchange: EXCHANGES.FREE,
             priceHistory: prices
         })
 

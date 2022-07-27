@@ -8,7 +8,7 @@ import {
 } from 'strategy'
 
 let backtestResults = new BacktestResults({
-    coin: COINS.bitcoin,
+    coin: COINS.BITCOIN,
     startingCoinAmount: 1,
     startingCashAmount: 1000,
     endingCoinAmount: 0.5,
@@ -37,7 +37,7 @@ let backtestResults = new BacktestResults({
             }
         ]
     }),
-    exchange: EXCHANGES.free
+    exchange: EXCHANGES.FREE
 })
 
 let optimizationResults = new OptimizationResults({

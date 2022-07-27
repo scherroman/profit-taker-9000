@@ -42,7 +42,7 @@ let prices = [
 ]
 
 let strategy = new OptimisticGridStrategy({
-    coin: COINS.bitcoin,
+    coin: COINS.BITCOIN,
     sellThreshold: 100,
     buyThreshold: 50,
     buyPercentage: 20,
@@ -67,7 +67,7 @@ describe('OptimisticGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.free,
+            exchange: EXCHANGES.FREE,
             priceHistory: prices
         })
 

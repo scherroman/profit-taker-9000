@@ -51,12 +51,14 @@ export class Coin {
 }
 
 export const COINS = {
-    bitcoin: new Coin({
+    /* eslint-disable @typescript-eslint/naming-convention */
+    BITCOIN: new Coin({
         name: 'Bitcoin',
         symbol: 'BTC'
     }),
-    ethereum: new Coin({
+    ETHEREUM: new Coin({
         name: 'Ethereum',
         symbol: 'ETH'
     })
+    /* eslint-enable @typescript-eslint/naming-convention */
 }

@@ -117,9 +117,11 @@ interface TradeOutput {
 }
 
 export const EXCHANGES = {
-    free: new Exchange({ name: 'Free', tradingFeePercentage: 0 }),
-    coinbasePro: new Exchange({
+    /* eslint-disable @typescript-eslint/naming-convention */
+    FREE: new Exchange({ name: 'Free', tradingFeePercentage: 0 }),
+    COINBASE_PRO: new Exchange({
         name: 'Coinbase Pro',
         tradingFeePercentage: 0.5
     })
+    /* eslint-enable @typescript-eslint/naming-convention */
 }

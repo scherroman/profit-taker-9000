@@ -22,7 +22,7 @@ let prices = [
 ]
 
 let strategy = new BuyAndHodlStrategy({
-    coin: COINS.bitcoin
+    coin: COINS.BITCOIN
 })
 
 describe('BuyAndHodlStrategy', () => {
@@ -41,7 +41,7 @@ describe('BuyAndHodlStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.free,
+            exchange: EXCHANGES.FREE,
             priceHistory: prices
         })
 

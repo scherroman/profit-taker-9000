@@ -3,7 +3,7 @@ import { EXCHANGES } from 'exchange'
 import { NaiveGridStrategy, ParameterRangeError } from 'strategy'
 
 let strategy = new NaiveGridStrategy({
-    coin: COINS.bitcoin,
+    coin: COINS.BITCOIN,
     buyThreshold: 10,
     sellThreshold: 10,
     buyPercentage: 10,
@@ -47,7 +47,7 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: basicPrices
         })
 
@@ -93,7 +93,7 @@ describe('NaiveGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: prices
         })
 
@@ -122,7 +122,7 @@ describe('NaiveGridStrategy', () => {
         let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: prices
         })
 
@@ -132,7 +132,7 @@ describe('NaiveGridStrategy', () => {
     })
     it('adapts the buy price to a multiple that mirrors the sell price multiple when the trigger threshold is 100 or more', async () => {
         let strategy = new NaiveGridStrategy({
-            coin: COINS.bitcoin,
+            coin: COINS.BITCOIN,
             buyThreshold: 80,
             sellThreshold: 400,
             buyPercentage: 10,
@@ -164,7 +164,7 @@ describe('NaiveGridStrategy', () => {
         let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: prices
         })
 
@@ -177,7 +177,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 0,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: prices
         })
         expect(trades).toHaveLength(0)
@@ -187,7 +187,7 @@ describe('NaiveGridStrategy', () => {
         let { trades } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 0,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: prices
         })
         expect(trades).toHaveLength(0)
@@ -196,7 +196,7 @@ describe('NaiveGridStrategy', () => {
         let { trades, buys, sells } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             startDate: new Date(2014, 1, 1),
             endDate: new Date(2014, 2, 1),
             priceHistory: basicPrices
@@ -210,7 +210,7 @@ describe('NaiveGridStrategy', () => {
         expect(
             () =>
                 new NaiveGridStrategy({
-                    coin: COINS.bitcoin,
+                    coin: COINS.BITCOIN,
                     buyThreshold: -10,
                     sellThreshold: 10,
                     buyPercentage: 10,
@@ -220,7 +220,7 @@ describe('NaiveGridStrategy', () => {
         expect(
             () =>
                 new NaiveGridStrategy({
-                    coin: COINS.bitcoin,
+                    coin: COINS.BITCOIN,
                     buyThreshold: 10,
                     sellThreshold: -10,
                     buyPercentage: 10,
@@ -230,7 +230,7 @@ describe('NaiveGridStrategy', () => {
         expect(
             () =>
                 new NaiveGridStrategy({
-                    coin: COINS.bitcoin,
+                    coin: COINS.BITCOIN,
                     buyThreshold: 10,
                     sellThreshold: 10,
                     buyPercentage: -10,
@@ -240,7 +240,7 @@ describe('NaiveGridStrategy', () => {
         expect(
             () =>
                 new NaiveGridStrategy({
-                    coin: COINS.bitcoin,
+                    coin: COINS.BITCOIN,
                     buyThreshold: 10,
                     sellThreshold: 10,
                     buyPercentage: 10,
@@ -270,7 +270,7 @@ let optimizePrices = [
 ]
 
 let optimizeStrategy = new NaiveGridStrategy({
-    coin: COINS.bitcoin,
+    coin: COINS.BITCOIN,
     buyThreshold: 10,
     sellThreshold: 10,
     buyPercentage: 10,
@@ -282,7 +282,7 @@ describe('NaiveGridStrategy.optimize', () => {
         let { all } = await optimizeStrategy.optimize({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.coinbasePro,
+            exchange: EXCHANGES.COINBASE_PRO,
             priceHistory: optimizePrices,
             parameterRanges: {
                 buyThreshold: {
@@ -328,7 +328,7 @@ describe('NaiveGridStrategy.optimize', () => {
             optimizeStrategy.optimize({
                 coinAmount: 1,
                 cashAmount: 1000,
-                exchange: EXCHANGES.coinbasePro,
+                exchange: EXCHANGES.COINBASE_PRO,
                 priceHistory: optimizePrices,
                 parameterRanges: {
                     buyThreshold: {
@@ -345,7 +345,7 @@ describe('NaiveGridStrategy.optimize', () => {
             optimizeStrategy.optimize({
                 coinAmount: 1,
                 cashAmount: 1000,
-                exchange: EXCHANGES.coinbasePro,
+                exchange: EXCHANGES.COINBASE_PRO,
                 priceHistory: optimizePrices,
                 parameterRanges: {
                     buyThreshold: {

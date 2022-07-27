@@ -63,7 +63,7 @@ import { COINS, EXCHANGES, OptimisticGridStrategy } from 'profit-taker-9000'
 
 async function main(): Promise<void> {
     let strategy = new OptimisticGridStrategy({
-        coin: COINS.bitcoin,
+        coin: COINS.BITCOIN,
         buyThreshold: 50,
         sellThreshold: 100,
         buyPercentage: 25,
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
         coinAmount: 1,
         cashAmount: 5000,
         startDate: new Date('2020-01-01'),
-        exchange: EXCHANGES.coinbasePro,
+        exchange: EXCHANGES.COINBASE_PRO,
     })
 
     console.log(results.description)
@@ -132,7 +132,7 @@ let results = await strategy.optimize({
     coinAmount: 1,
     cashAmount: 5000,
     startDate: new Date('2020-01-01'),
-    exchange: EXCHANGES.coinbasePro,
+    exchange: EXCHANGES.COINBASE_PRO,
     parameterRanges: {
         buyThreshold: {
             minimum: 0,

@@ -48,7 +48,7 @@ let prices = [
 ]
 
 let strategy = new CostBasisGridStrategy({
-    coin: COINS.bitcoin,
+    coin: COINS.BITCOIN,
     sellThreshold: 100,
     buyThreshold: 50,
     buyPercentage: 20,
@@ -74,7 +74,7 @@ describe('CostBasisGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.free,
+            exchange: EXCHANGES.FREE,
             priceHistory: prices
         })
 
@@ -93,7 +93,7 @@ describe('CostBasisGridStrategy', () => {
     })
     it('uses start date price as cost basis if none is provided', async () => {
         let strategy = new CostBasisGridStrategy({
-            coin: COINS.bitcoin,
+            coin: COINS.BITCOIN,
             sellThreshold: 100,
             buyThreshold: 50,
             buyPercentage: 20,
@@ -116,7 +116,7 @@ describe('CostBasisGridStrategy', () => {
         } = await strategy.backtest({
             coinAmount: 1,
             cashAmount: 1000,
-            exchange: EXCHANGES.free,
+            exchange: EXCHANGES.FREE,
             priceHistory: prices
         })
 
