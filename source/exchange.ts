@@ -116,7 +116,7 @@ interface TradeOutput {
     newCashAmount: number
 }
 
-export const EXCHANGES: Record<string, Exchange> = {
+export const EXCHANGES = {
     free: new Exchange({ name: 'Free', tradingFeePercentage: 0 }),
     coinbasePro: new Exchange({
         name: 'Coinbase Pro',

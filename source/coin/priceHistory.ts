@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs'
+import fse from 'fs-extra'
 import { parseISO } from 'date-fns'
 import parseCsv from 'csv-parse/lib/sync'
 
@@ -104,7 +104,7 @@ export class PriceHistory {
     }
 
     static async loadFromCsv(filePath: string): Promise<PriceHistory> {
-        let priceHistoryFileContent = await fs.readFile(filePath)
+        let priceHistoryFileContent = await fse.readFile(filePath)
         let rawPriceHistory: unknown = parseCsv(priceHistoryFileContent, {
             columns: true,
             /* eslint-disable-next-line @typescript-eslint/naming-convention */

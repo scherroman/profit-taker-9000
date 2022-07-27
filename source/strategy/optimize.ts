@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fse from 'fs-extra'
 import util from 'util'
 import { Range } from 'utilities'
 
@@ -48,13 +48,13 @@ export class OptimizationResults {
      * @param type - Type of plot to make
      * @param filePath - Path to output the file to
      */
-    plot({
+    async plot({
         type,
         filePath = 'plot.html'
     }: {
         type: string
         filePath?: string
-    }): void {
+    }): Promise<void> {
         let { data, layout } = this.getPlotData({ type })
         let html = `
         <head>
@@ -71,7 +71,7 @@ export class OptimizationResults {
         </body>
         `
 
-        fs.writeFileSync(filePath, html)
+        await fse.outputFile(filePath, html)
     }
 
     getPlotData({ type }: { type: string }): {

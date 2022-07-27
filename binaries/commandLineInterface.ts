@@ -1,27 +1,29 @@
 import yargs, { Argv, ArgumentsCamelCase } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { Coin, updateCoinPrices } from 'coin'
+import { Coin } from 'coin'
 
 yargs(hideBin(process.argv))
     .command(
-        'update <symbol>',
-        'Update prices for a coin',
+        'fetch <symbol>',
+        'Fetches the price history for a coin',
         (args: Argv) => {
             args.positional('symbol', {
                 describe: 'Symbol for the coin. e.g.) BTC for bitcoin'
             })
         },
         async ({ symbol }: ArgumentsCamelCase<{ symbol: string }>) => {
-            console.log(`Checking prices for ${symbol}...`)
-            let prices = await updateCoinPrices(
-                new Coin({ name: symbol, symbol })
-            )
+            console.log(`Checking price history for ${symbol}...`)
+            let prices = await new Coin({
+                name: symbol,
+                symbol
+            }).updatePriceHistory()
+
             if (prices.length === 0) {
                 console.log('Prices are up to date.')
             } else {
                 console.log(
-                    `Updated prices for the last ${prices.length} days!`
+                    `Fetched prices for the last ${prices.length} days.`
                 )
             }
         }

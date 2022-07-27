@@ -38,13 +38,23 @@ npm link
 
 ## Usage
 
+### Fetch coin price history
+
+```
+npx profit-taker-9000 fetch <symbol>
+```
+
+e.g.) `BTC` for Bitcoin, `ETH` for Ethereum
+
+Prices are sourced from [CoinGecko](https://www.coingecko.com/)
+
 ### Built-in strategies
 
--   [hodl](source/strategy/strategies/hodl.ts)
--   [buyAndHodl](source/strategy/strategies/buyAndHodl.ts)
--   [naiveGrid](source/strategy/strategies/naiveGrid.ts)
--   [optimisticGrid](source/strategy/strategies/optimisticGrid.ts)
--   [costBasisGrid](source/strategy/strategies/costBasisGrid.ts)
+-   [Hodl](source/strategy/strategies/hodl.ts)
+-   [BuyAndHodl](source/strategy/strategies/buyAndHodl.ts)
+-   [NaiveGrid](source/strategy/strategies/naiveGrid.ts)
+-   [OptimisticGrid](source/strategy/strategies/optimisticGrid.ts)
+-   [CostBasisGrid](source/strategy/strategies/costBasisGrid.ts)
 
 ### Backtest a strategy
 
@@ -192,9 +202,17 @@ Trades: [
 If a strategy has two or less parameters, you can generate a plot to visualize profits against the parameters. The grid strategies currently use 4 parameters however, so they cannot be plotted.
 
 ```
-results.plot({ type: 'Surface', filePath: 'plot.html' })
-results.plot({ type: 'Scatter', filePath: 'plot.html' })
-results.plot({ type: 'Countour', filePath: 'plot.html' })
+await results.plot({ type: 'Surface', filePath: 'plot.html' })
+await results.plot({ type: 'Scatter', filePath: 'plot.html' })
+await results.plot({ type: 'Countour', filePath: 'plot.html' })
+```
+
+### Use a different coin
+
+```
+import { Coin } from 'profit-taker-9000'
+
+let coin =  new Coin({name: 'Solana', symbol: 'SOL'})
 ```
 
 ### Create a custom strategy

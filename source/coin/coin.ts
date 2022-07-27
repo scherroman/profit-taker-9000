@@ -1,5 +1,6 @@
-import { PriceHistory } from './priceHistory'
-import { updateCoinPrices } from './utilities'
+import fs from 'fs'
+import { HistoricalPrice, PriceHistory } from './priceHistory'
+import { updatePriceHistory } from './utilities'
 
 const PRICE_HISTORIES_PATH = './data/priceHistories'
 
@@ -32,6 +33,10 @@ export class Coin {
             return this.#priceHistory
         }
 
+        if (!fs.existsSync(this.priceHistoryFilePath)) {
+            await updatePriceHistory(this)
+        }
+
         this.#priceHistory = await PriceHistory.loadFromCsv(
             this.priceHistoryFilePath
         )
@@ -39,17 +44,13 @@ export class Coin {
         return this.#priceHistory
     }
 
-    async updatePriceHistory(): Promise<PriceHistory> {
-        await updateCoinPrices(this)
-        this.#priceHistory = await PriceHistory.loadFromCsv(
-            this.priceHistoryFilePath
-        )
-
-        return this.#priceHistory
+    async updatePriceHistory(): Promise<HistoricalPrice[]> {
+        let prices = await updatePriceHistory(this)
+        return prices
     }
 }
 
-export const COINS: Record<string, Coin> = {
+export const COINS = {
     bitcoin: new Coin({
         name: 'Bitcoin',
         symbol: 'BTC'

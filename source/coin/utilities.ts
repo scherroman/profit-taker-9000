@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fse from 'fs-extra'
 import axios, { AxiosInstance } from 'axios'
 import { addDays, differenceInDays } from 'date-fns'
 import stringifyCsv from 'csv-stringify/lib/sync'
@@ -9,13 +9,16 @@ import { HistoricalPrice, PriceHistory } from './priceHistory'
 const ISO_8601_YEAR_MONTH_DAY_SUBSTRING_END_INDEX = 10
 
 /**
- * Updates the prices for the given coin in storage
- * @param coin - Coin to update prices for
+ * Fetches and stores the price history for the given coin
+ * @param coin - Coin to fetch prices for
+ * @returns An array of the historical prices that were added to the price history
  */
-export async function updateCoinPrices(coin: Coin): Promise<HistoricalPrice[]> {
+export async function updatePriceHistory(
+    coin: Coin
+): Promise<HistoricalPrice[]> {
     let priceHistory: PriceHistory | undefined
     let fromDate: Date | undefined
-    if (fs.existsSync(coin.priceHistoryFilePath)) {
+    if (fse.existsSync(coin.priceHistoryFilePath)) {
         priceHistory = await PriceHistory.loadFromCsv(coin.priceHistoryFilePath)
         fromDate = addDays(
             priceHistory.prices[priceHistory.prices.length - 1].date,
@@ -42,7 +45,7 @@ export async function updateCoinPrices(coin: Coin): Promise<HistoricalPrice[]> {
             ])
         ])
 
-        fs.writeFileSync(coin.priceHistoryFilePath, csvString)
+        await fse.outputFile(coin.priceHistoryFilePath, csvString)
     }
 
     return newPrices
