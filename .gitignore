@@ -1,7 +1,6 @@
 .vscode/
 node_modules/
 build/
-binaries/
 
 # OS metadata
 .DS_Store
