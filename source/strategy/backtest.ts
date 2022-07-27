@@ -237,7 +237,11 @@ export class BacktestResults {
             this.priceHistory.endingPrice
         )}/${this.coin.symbol}`
 
-        description += `\nTrades: ${this.trades.length} trades (${this.buys.length} buys, ${this.sells.length} sells)`
+        description += `\nTrades: ${this.trades.length} trades (${
+            this.buys.length
+        } ${this.buys.length === 1 ? 'buy' : 'buys'}, ${this.sells.length} ${
+            this.sells.length === 1 ? 'sell' : 'sells'
+        })`
 
         description += `\n  Time: ${formatDuration(
             intervalToDuration({

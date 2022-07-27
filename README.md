@@ -94,7 +94,7 @@ Profit: $17,040.18 / 139.73% / 2.4x
  Value: $12,195.15 -> $29,235.34
 Amount: 1 BTC / $5,000 -> 0.36255624 BTC / $21,536.23
  Price: $7,195.15/BTC -> $21,235.61/BTC
-Trades: 4 trades (1 buys, 3 sells)
+Trades: 4 trades (1 buy, 3 sells)
   Time: 2 years, 6 months, 26 days (December 31, 2019 to July 26, 2022)
 
 Trades: [
@@ -178,7 +178,7 @@ Profit: $67,986.18 / 557.49% / 6.57x
  Value: $12,195.15 -> $80,181.33
 Amount: 1 BTC / $5,000 -> 3.77571052 BTC / $1.81
  Price: $7,195.15/BTC -> $21,235.61/BTC
-Trades: 2 trades (1 buys, 1 sells)
+Trades: 2 trades (1 buy, 1 sell)
   Time: 2 years, 6 months, 26 days (December 31, 2019 to July 26, 2022)
 
 Trades: [
