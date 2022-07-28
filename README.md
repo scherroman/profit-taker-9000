@@ -255,4 +255,4 @@ npm run test
 npm run build
 ```
 
-Javascript output is placed in the `build` folder
+Built Javascript, type definitions, and source maps are placed in the `build` folder.
