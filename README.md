@@ -48,7 +48,7 @@ e.g.) `BTC` for Bitcoin, `ETH` for Ethereum
 
 Price histories are sourced from [CoinGecko](https://www.coingecko.com/) and stored under `data/priceHistories` in the current working directory.
 
-Note that the price history is automatically fetched when a coin is used in code for the first time, but afterwards to retrieve the latest prices the `fetch` command must be used.
+Note that the price history is automatically fetched when a coin is used in code for the first time, but afterwards the `fetch` command must be used to retrieve the latest prices.
 
 ### Built-in strategies
 
