@@ -253,12 +253,4 @@ npm run test
 npm run build
 ```
 
-Javascript output is placed in the `/build` folder
-
-## Useful Commands
-
-**Run a typescript script using import paths from `tsconfig.json`**
-
-```
-npx ts-node -r tsconfig-paths/register
-```
+Javascript output is placed in the `build` folder
