@@ -38,7 +38,7 @@ npm link
 
 ## Usage
 
-### Fetch coin price history
+### Fetch a coin's price history
 
 ```
 npx profit-taker-9000 fetch <symbol>
@@ -46,7 +46,9 @@ npx profit-taker-9000 fetch <symbol>
 
 e.g.) `BTC` for Bitcoin, `ETH` for Ethereum
 
-Prices are sourced from [CoinGecko](https://www.coingecko.com/)
+Price histories are sourced from [CoinGecko](https://www.coingecko.com/) and stored under `data/priceHistories` in the current working directory.
+
+Note that the price history is automatically fetched when a coin is used in code for the first time, but afterwards to retrieve the latest prices the `fetch` command must be used.
 
 ### Built-in strategies
 
