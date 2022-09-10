@@ -3,7 +3,7 @@ import { hideBin } from 'yargs/helpers'
 
 import { Coin } from 'coin'
 
-yargs(hideBin(process.argv))
+void yargs(hideBin(process.argv))
     .command(
         'fetch <symbol>',
         'Fetches the price history for a coin',
