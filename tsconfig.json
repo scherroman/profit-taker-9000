@@ -10,19 +10,18 @@
         "sourceMap": true,
         "baseUrl": "source",
         "paths": {
-            "coin": [ "coin"],
-            "strategy": [ "strategy"],
-            "exchange": [ "exchange"],
-            "utilities": [ "utilities"]
+            "coin": ["coin"],
+            "strategy": ["strategy"],
+            "exchange": ["exchange"],
+            "utilities": ["utilities"]
         },
         "plugins": [
-            { "transform": "typescript-transform-paths"},
-            { "transform": "typescript-transform-paths", "afterDeclarations": true }
+            { "transform": "typescript-transform-paths" },
+            {
+                "transform": "typescript-transform-paths",
+                "afterDeclarations": true
+            }
         ]
     },
-    "include": [
-        "source/**/*",
-        "binaries/**/*.ts",
-        "tests/**/*"
-    ]
+    "include": ["source/**/*", "binaries/**/*.ts", "tests/**/*"]
 }

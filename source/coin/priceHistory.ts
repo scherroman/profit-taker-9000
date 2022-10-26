@@ -1,24 +1,19 @@
+import zod from 'zod'
 import fse from 'fs-extra'
 import { parseISO } from 'date-fns'
 import parseCsv from 'csv-parse/lib/sync'
 
-function isArrayOfRawHistoricalPrices(
-    value: unknown
-): value is RawHistoricalPrice[] {
-    return (
-        Array.isArray(value) &&
-        value.every((element) => isRawHistoricalPrice(element))
-    )
-}
+/**
+ * A parsed historical price
+ */
+const RawHistoricalPrice = zod.object({
+    date: zod.string(),
+    closingPrice: zod.number()
+})
 
-function isRawHistoricalPrice(value: unknown): value is RawHistoricalPrice {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        'date' in value &&
-        'closingPrice' in value
-    )
-}
+type RawHistoricalPrice = zod.infer<typeof RawHistoricalPrice>
+
+const RawHistoricalPrices = RawHistoricalPrice.array()
 
 /**
  * A price of a coin on a given date
@@ -26,14 +21,6 @@ function isRawHistoricalPrice(value: unknown): value is RawHistoricalPrice {
 export interface HistoricalPrice {
     date: Date
     price: number
-}
-
-/**
- * A parsed historical price
- */
-interface RawHistoricalPrice {
-    date: string
-    closingPrice: number
 }
 
 export class PriceHistory {
@@ -111,15 +98,19 @@ export class PriceHistory {
             skip_empty_lines: true
         })
 
-        if (
-            !isArrayOfRawHistoricalPrices(rawPriceHistory) ||
-            rawPriceHistory.length === 0
-        ) {
+        let parsedPriceHistory: RawHistoricalPrice[]
+        try {
+            parsedPriceHistory = RawHistoricalPrices.parse(rawPriceHistory)
+        } catch (error) {
             throw new Error(`Failed to read price history for ${filePath}`)
         }
 
+        if (parsedPriceHistory.length === 0) {
+            throw new Error(`Price history is empty for ${filePath}`)
+        }
+
         let historicalPrices = []
-        for (let historicalPrice of rawPriceHistory) {
+        for (let historicalPrice of parsedPriceHistory) {
             historicalPrices.push({
                 // Specify zero time offset to prevent storing local time zone offset
                 date: parseISO(`${historicalPrice.date}T00:00:00.000Z`),

@@ -1,3 +1,4 @@
+import zod from 'zod'
 import fse from 'fs-extra'
 import axios, { AxiosInstance } from 'axios'
 import { addDays, differenceInDays } from 'date-fns'
@@ -120,13 +121,16 @@ class CoinGeckoClient {
     }
 
     private async search(query: string): Promise<CoinSearchResponse> {
-        let data: unknown = await this.get(`search?query=${query}`)
+        let data = await this.get(`search?query=${query}`)
 
-        if (!isCoinSearchResponse(data) || !isArrayOfCoinResults(data.coins)) {
+        let parsedData: CoinSearchResponse
+        try {
+            parsedData = CoinSearchResponse.parse(data)
+        } catch (error) {
             throw new Error('Failed to parse search results')
         }
 
-        return data
+        return parsedData
     }
 
     private async getMarketChart(
@@ -141,15 +145,18 @@ class CoinGeckoClient {
                 days = (differenceInDays(new Date(), fromDate) + 1).toString()
             }
         }
-        let data: unknown = await this.get(
+        let data = await this.get(
             `coins/${id}/market_chart?id=${id}&vs_currency=usd&days=${days}&interval=daily`
         )
 
-        if (!isCoinMarketChartResponse(data)) {
+        let parsedData: CoinMarketChartResponse
+        try {
+            parsedData = CoinMarketChartResponse.parse(data)
+        } catch (error) {
             throw new Error('Failed to parse market chart results')
         }
 
-        return data
+        return parsedData
     }
 
     private async get(url: string): Promise<unknown> {
@@ -158,40 +165,19 @@ class CoinGeckoClient {
     }
 }
 
-interface CoinSearchResponse {
-    coins: CoinResult[]
-}
+const CoinSearchResponse = zod.object({
+    coins: zod
+        .object({
+            id: zod.string(),
+            symbol: zod.string()
+        })
+        .array()
+})
 
-interface CoinResult {
-    id: string
-    symbol: string
-}
+type CoinSearchResponse = zod.infer<typeof CoinSearchResponse>
 
-function isCoinResult(value: unknown): value is CoinResult {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        'id' in value &&
-        'symbol' in value
-    )
-}
+const CoinMarketChartResponse = zod.object({
+    prices: zod.number().array().array()
+})
 
-function isArrayOfCoinResults(value: unknown): value is CoinResult[] {
-    return (
-        Array.isArray(value) && value.every((element) => isCoinResult(element))
-    )
-}
-
-function isCoinSearchResponse(value: unknown): value is CoinSearchResponse {
-    return typeof value === 'object' && value !== null && 'coins' in value
-}
-
-interface CoinMarketChartResponse {
-    prices: number[][]
-}
-
-function isCoinMarketChartResponse(
-    value: unknown
-): value is CoinMarketChartResponse {
-    return typeof value === 'object' && value !== null && 'prices' in value
-}
+type CoinMarketChartResponse = zod.infer<typeof CoinMarketChartResponse>

@@ -4,6 +4,18 @@ import { Range } from 'utilities'
 
 import { BacktestInput, BacktestResults } from './backtest'
 
+export enum PlotType {
+    Contour = 'Countour',
+    Surface = 'Surface',
+    Scatter = 'Scatter'
+}
+
+const SUPPORTED_PLOT_TYPES = [
+    PlotType.Contour,
+    PlotType.Surface,
+    PlotType.Scatter
+]
+
 /**
  * Crunches all possible outcomes of a strategy given a set of parameter ranges
  */
@@ -80,7 +92,8 @@ export class OptimizationResults {
     } {
         let plotType = PlotType[type as keyof typeof PlotType]
 
-        if (!plotType) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (plotType === undefined) {
             throw new Error(`Plot type ${type} does not exist`)
         }
 
@@ -91,11 +104,7 @@ export class OptimizationResults {
         }
 
         let data
-        if (
-            plotType === PlotType.Contour ||
-            plotType === PlotType.Surface ||
-            plotType === PlotType.Scatter
-        ) {
+        if (SUPPORTED_PLOT_TYPES.includes(plotType)) {
             data = this.get3dPlotData({ type })
         } else {
             throw new Error(`Plot type ${type} not yet supported`)
@@ -313,12 +322,6 @@ export class ParameterBacktestResults {
 
         return description
     }
-}
-
-export enum PlotType {
-    Contour = 'Countour',
-    Surface = 'Surface',
-    Scatter = 'Scatter'
 }
 
 type PlotData = Basic3dData | Scatter3dData

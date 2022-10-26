@@ -50,7 +50,7 @@ describe('PriceHistory', () => {
                     })
             ).toThrow()
         })
-    it('forRange throws an error if the start date or end date is outside the price history date range', async () => {
+    it('forRange throws an error if the start date or end date is outside the price history date range', () => {
         let priceHistory = new PriceHistory({
             prices: [
                 {

@@ -206,7 +206,7 @@ describe('NaiveGridStrategy', () => {
         expect(buys).toHaveLength(0)
         expect(sells).toHaveLength(1)
     })
-    it('throws an error if incorrect parameter values are provided', async () => {
+    it('throws an error if incorrect parameter values are provided', () => {
         expect(
             () =>
                 new NaiveGridStrategy({

@@ -142,7 +142,8 @@ export abstract class Strategy {
         for (let parameter of this.parameters) {
             let parameterRange = parameterRanges[parameter.name]
 
-            if (!parameterRange) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (parameterRange === undefined) {
                 throw new ParameterRangeError(
                     `Missing range for parameter ${parameter.name}`
                 )

@@ -96,30 +96,35 @@ export class CostBasisGridStrategy extends GridStrategy {
 
                 if (
                     trade.type == TradeType.Buy &&
-                    (!previousTradeType || previousTradeType === TradeType.Buy)
+                    (previousTradeType === null ||
+                        previousTradeType === TradeType.Buy)
                 ) {
                     this.buyThresholdMultiplier *= 2
                 } else if (
                     this.buyThresholdMultiplier > 1 &&
                     trade.type === TradeType.Sell
                 ) {
+                    // Reset buy threshold when a sell is made
                     this.buyThresholdMultiplier = 1
                 }
 
                 if (
                     trade.type == TradeType.Sell &&
-                    (!previousTradeType || previousTradeType === TradeType.Sell)
+                    (previousTradeType === null ||
+                        previousTradeType === TradeType.Sell)
                 ) {
                     this.sellThresholdMultiplier *= 2
                 } else if (
                     this.sellThresholdMultiplier > 1 &&
                     trade.type === TradeType.Buy
                 ) {
+                    // Reset sell threshold when a buy is made
                     this.sellThresholdMultiplier = 1
                 }
 
                 buyPrice = this.getBuyPrice(costBasis)
                 sellPrice = this.getSellPrice(costBasis)
+                previousTradeType = trade.type
             }
         }
 

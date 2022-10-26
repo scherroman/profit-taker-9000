@@ -148,6 +148,7 @@ export abstract class GridStrategy extends Strategy {
         }
 
         if (shouldBuy) {
+            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;({ trade, newCoinAmount, newCashAmount } = exchange.buy({
                 amount: this.buyPercentageFraction * cashAmount,
                 historicalPrice: historicalPrice,
@@ -155,6 +156,7 @@ export abstract class GridStrategy extends Strategy {
                 initialCashAmount: cashAmount
             }))
         } else if (shouldSell) {
+            // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;({ trade, newCoinAmount, newCashAmount } = exchange.sell({
                 amount: this.sellPercentageFraction * coinAmount,
                 historicalPrice: historicalPrice,
